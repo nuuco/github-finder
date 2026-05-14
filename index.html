@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Finder</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <h1 class="header__title">GitHub Finder</h1>
+        <p class="header__subtitle">GitHub 사용자 프로필과 최신 저장소를 조회합니다.</p>
+      </header>
+
+      <section class="search" aria-label="사용자 검색">
+        <form class="search__form" id="search-form" novalidate>
+          <label class="visually-hidden" for="username-input">GitHub 사용자명</label>
+          <div class="search__field">
+            <span class="search__icon" aria-hidden="true">&#128269;</span>
+            <input
+              id="username-input"
+              class="search__input"
+              type="text"
+              name="username"
+              autocomplete="username"
+              placeholder="GitHub 로그인(정확히 일치)"
+              spellcheck="false"
+            />
+            <button type="submit" class="search__button">검색</button>
+          </div>
+        </form>
+      </section>
+
+      <p
+        class="status"
+        id="status-message"
+        role="status"
+        aria-live="polite"
+        data-variant="idle"
+      ></p>
+
+      <main class="main">
+        <section
+          class="panel profile-panel"
+          id="profile-panel"
+          aria-labelledby="profile-heading"
+          data-state="empty"
+        >
+          <h2 id="profile-heading" class="visually-hidden">사용자 프로필</h2>
+          <div class="profile">
+            <div class="profile__avatar-wrap">
+              <img
+                id="profile-avatar"
+                class="profile__avatar profile__avatar--placeholder"
+                alt=""
+                width="96"
+                height="96"
+                decoding="async"
+              />
+            </div>
+            <div class="profile__meta">
+              <p id="profile-name" class="profile__name profile__placeholder">—</p>
+              <p id="profile-bio" class="profile__bio profile__placeholder">검색하면 프로필이 표시됩니다.</p>
+            </div>
+          </div>
+          <div class="stats" id="stats-row" aria-label="통계">
+            <div class="stats__item">
+              <span class="stats__label">팔로워</span>
+              <span id="stat-followers" class="stats__value profile__placeholder">—</span>
+            </div>
+            <div class="stats__item">
+              <span class="stats__label">팔로잉</span>
+              <span id="stat-following" class="stats__value profile__placeholder">—</span>
+            </div>
+            <div class="stats__item">
+              <span class="stats__label">공개 저장소</span>
+              <span id="stat-repos" class="stats__value profile__placeholder">—</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel repos-panel" aria-labelledby="repos-heading">
+          <h2 id="repos-heading" class="repos__title">최신 저장소</h2>
+          <ul class="repos" id="repo-list" data-state="empty"></ul>
+        </section>
+      </main>
+    </div>
+
+    <template id="repo-item-template">
+      <li class="repos__item">
+        <a class="repos__link" href="" target="_blank" rel="noopener noreferrer"></a>
+        <p class="repos__desc"></p>
+      </li>
+    </template>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
