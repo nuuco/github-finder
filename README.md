@@ -6,13 +6,6 @@
 
 > GitHub 웹의 **프로필·저장소** 화면을 참고해 색·타이포·아이콘·여백이 **익숙한 톤**으로 보이도록 맞추는 데 무게를 두었습니다. Primer·Octicons나 공식 UI와 **완전히 동일한 복제**를 목표로 하지는 않습니다.
 
-<details>
-<summary><strong>화면 예시</strong> (클릭하여 펼치기)</summary>
-
-<img src="screencapture.png" alt="GitHub Finder 화면: 검색·최근 검색 칩·프로필·저장소 목록" width="820" />
-
-</details>
-
 ## 1. 기능
 
 | 영역 | 내용 |
@@ -75,7 +68,7 @@ npx --yes serve .
 | `index.html` | 마크업 · 상단 SVG `<symbol>` 스프라이트 · 검색(`#username-clear`) · `#search-recent` · `#profile-empty-hint` · `#repo-item-template` · `<script src="app.js" defer>` |
 | `styles.css` | 라이트/다크 변수 · 검색 · 최근 검색(드래그 커서·스크롤바 숨김) · 프로필 · 빈 안내 · vcard · 저장소 · 반응형 |
 | `app.js` | `RecentSearchStore` · `RecentSearchDragScroll` · `UrlSafety` · `GitHubClient` · `FinderView` · `GitHubFinderApp` |
-| `screencapture.png` | README 화면 예시(`<details>` 블록에서 참조) |
+| `screencapture.png` | README **9. 화면 예시** 절에서 참조 |
 | `PLAN.md` | 개발 계획(범위 · Must/Nice) |
 | `AGENTS.md` | 작업 이력 한 줄 요약 |
 | `docs/prompt-log.md` | 프롬프트 · 의도/반영 로그 |
@@ -86,3 +79,64 @@ npx --yes serve .
 - **계획**: [PLAN.md](PLAN.md) — 기능 · API · 스택 · 범위
 - **프롬프트 로그**: [docs/prompt-log.md](docs/prompt-log.md) — 요청 · 의도 정리
 - **UI 트러블슈팅**: [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md) — 아이콘 · vcard · 이메일 API · 빈 필드 · 타이포 · 통합 상태 UI · 최근 검색 드래그 등(본 문서 **2.**~**9.** 절 형식은 프롬프트 로그와 동일)
+
+## 8. 개발 후기
+
+GitHub 웹 프로필·저장소 화면의 톤이 마음에 들어, 아이콘(Octicons 스타일 스프라이트)·폰트 크기·여백 등을 비슷하게 맞추는 데 시간을 들였습니다. 검색 입력 흐름도 손에 익게 다듬었고, 같은 사용자명을 반복 입력하는 부담을 줄이기 위해 예전에 익힌 로컬 스토리지 패턴을 그대로 살려 **성공한 조회만** 최근 검색 칩으로 모아 두고, 한 번 탭하면 다시 검색되도록 구성했습니다.
+
+최근 검색 칩 줄에서는 트러블슈팅이 특히 많았습니다. 처음에는 가로 스크롤바가 보이는게 어색해서 스크롤바를 숨기고 마우스로 드래그해 이동하는 방식으로 바꿨습니다. 그런데 드래그가 **칩 사이의 빈 공간**에서만 잡혀 사용하기 불편한 것을 발견했고, **칩 위에서도** 드래그되게 영역을 넓혔습니다. 이번에는 칩 클릭(재검색)과 × 삭제가 먹지 않는 현상이 생겼습니다. 원인은 `pointerdown` 이후 스크롤을 처리하는 쪽과 버튼의 `click`이 한 제스처 안에서 충돌하는 전형적인 케이스였고, **가로로 일정 거리 이상 움직였을 때만** “드래그로 간주”하는 임계값과, 드래그로 끝난 뒤 **불필요한 클릭 한 번을 삼키는** 처리로 둘 다 살리도록 조율했습니다.
+
+이 과정에서 포인터 이벤트가 겹칠 때(스크롤 vs 클릭) 순서와 플래그로 흐름을 나누는 패턴을 코드로 정리할 수 있어 의미 있었습니다.
+
+아래는 [`app.js`](app.js)의 `RecentSearchDragScroll`의 핵심 로직입니다.
+
+```javascript
+const RECENT_DRAG_COMMIT_PX = 10;
+
+// — pointermove: “드래그로 확정”되기 전에는 스크롤하지 않고, 가로 임계·대각(가로 우선)만 검사
+if (!this._dragCommitted) {
+  if (
+    Math.abs(dx) >= RECENT_DRAG_COMMIT_PX &&
+    Math.abs(dx) >= Math.abs(dy) * 0.55
+  ) {
+    this._dragCommitted = true;
+    this.el.classList.add("search-recent__list--dragging");
+    this._samples = [{ t: performance.now(), x: e.clientX }];
+  } else {
+    return;
+  }
+}
+this.el.scrollLeft = this._startScrollLeft - dx;
+
+// — pointerup: 실제로 드래그했으면 직후 click을 무시하도록 표시
+if (didDrag) {
+  this._suppressClick = true;
+}
+
+// — click(캡처 단계): 리스트 안에서만, 위 플래그가 켜졌을 때 전파 차단
+this.el.addEventListener(
+  "click",
+  (e) => {
+    if (!this._suppressClick) return;
+    const t = e.target;
+    if (!(t instanceof Node) || !this.el.contains(t)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    this._suppressClick = false;
+  },
+  true
+);
+```
+
+실제 [`app.js`](app.js)에서는 위 `click` 처리가 `#onClickCapture` 메서드로 분리되어 `constructor`에서 `this.el.addEventListener("click", this.#onClickCapture, true)` 형태로 붙어 있습니다.
+
+**요약**: 손가락/마우스가 조금만 움직인 상태에서는 버튼 클릭으로 남기고, 가로로 충분히 움직였을 때만 스크롤 드래그로 전환합니다. 드래그로 끝난 제스처 뒤에는 브라우저가 버튼에 남겨 줄 수 있는 “유령 클릭”을 캡처 단계에서 한 번 막아, 스크롤과 칩·× 동작이 같이 살아 있게 했습니다.
+
+## 9. 화면 예시
+
+<details>
+<summary><strong>스크린샷</strong> (클릭하여 펼치기)</summary>
+
+<img src="screencapture.png" alt="GitHub Finder 화면: 검색·최근 검색 칩·프로필·저장소 목록" width="820" />
+
+</details>
