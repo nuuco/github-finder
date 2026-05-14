@@ -30,7 +30,6 @@ const MESSAGES = Object.freeze({
   idleRepos: "검색하면 최신 저장소가 표시됩니다.",
   labelJoined: "가입",
   labelProfileUpdated: "프로필 갱신",
-  btnGithubProfile: "GitHub에서 프로필 보기",
   followersSuffix: "팔로워",
   followingSuffix: "팔로잉",
 });
@@ -237,8 +236,6 @@ class FinderView {
     /** @type {HTMLElement | null} */ this._nameEl = null;
     /** @type {HTMLElement | null} */ this._loginEl = null;
     /** @type {HTMLElement | null} */ this._bioEl = null;
-    /** @type {HTMLElement | null} */ this._profileActionsEl = null;
-    /** @type {HTMLAnchorElement | null} */ this._githubBtnEl = null;
     /** @type {HTMLUListElement | null} */ this._vcardListEl = null;
     /** @type {HTMLElement | null} */ this._inlineStatsEl = null;
     /** @type {HTMLElement | null} */ this._statsRowEl = null;
@@ -259,9 +256,6 @@ class FinderView {
     this._nameEl = document.getElementById("profile-name");
     this._loginEl = document.getElementById("profile-login");
     this._bioEl = document.getElementById("profile-bio");
-    this._profileActionsEl = document.getElementById("profile-actions");
-    const gh = document.getElementById("profile-github-btn");
-    this._githubBtnEl = gh instanceof HTMLAnchorElement ? gh : null;
     const vc = document.getElementById("profile-vcard");
     this._vcardListEl = vc instanceof HTMLUListElement ? vc : null;
     this._inlineStatsEl = document.getElementById("profile-inline-stats");
@@ -315,11 +309,6 @@ class FinderView {
       this._bioEl.textContent = "";
       this._bioEl.hidden = true;
     }
-    if (this._githubBtnEl) {
-      this._githubBtnEl.removeAttribute("href");
-      this._githubBtnEl.hidden = true;
-    }
-    if (this._profileActionsEl) this._profileActionsEl.hidden = true;
     if (this._vcardListEl) {
       this._vcardListEl.replaceChildren();
       this._vcardListEl.hidden = true;
@@ -363,27 +352,6 @@ class FinderView {
     wrap.appendChild(valueNode);
     li.appendChild(wrap);
     list.appendChild(li);
-  }
-
-  /**
-   * @param {Record<string, unknown>} user
-   */
-  #renderGithubButton(user) {
-    if (!this._githubBtnEl || !this._profileActionsEl) return;
-    const href = UrlSafety.safeHttpUrl(
-      typeof user.html_url === "string" ? user.html_url : ""
-    );
-    if (href) {
-      this._githubBtnEl.href = href;
-      const span = this._githubBtnEl.querySelector("span");
-      if (span) span.textContent = MESSAGES.btnGithubProfile;
-      this._githubBtnEl.hidden = false;
-      this._profileActionsEl.hidden = false;
-    } else {
-      this._githubBtnEl.removeAttribute("href");
-      this._githubBtnEl.hidden = true;
-      this._profileActionsEl.hidden = true;
-    }
   }
 
   /**
@@ -563,7 +531,6 @@ class FinderView {
       }
     }
 
-    this.#renderGithubButton(user);
     this.#renderInlineStats(user, login);
     this.#renderVcard(user, login);
 

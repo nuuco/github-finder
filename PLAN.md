@@ -40,7 +40,7 @@
 ## 4. UI·콘텐츠
 
 - 초기 화면은 **데이터 없음(빈 상태)** 로 시작한다.
-- 프로필: 아바타, 표시 이름, **@로그인**(GitHub 프로필 링크), 소개, **GitHub에서 프로필 보기** 버튼.
+- 프로필: 아바타, 표시 이름, **@로그인**(GitHub 프로필 링크), 소개. 프로필 페이지로 가기는 **@로그인** 링크만 사용(중복 버튼 없음).
 - **링크**: `blog`(웹), `twitter_username`(X), 팔로워·팔로잉 GitHub 탭 링크.
 - **연락**: `company`, `location`, 공개 `email`(비인증 `GET /users` 응답에 포함될 때만 UI 표시 가능).
 - **이력**: `created_at`, `updated_at`.
@@ -67,7 +67,7 @@
 
 ## 7. 문서·범위 밖
 
-- **README**: 기능 요약, 로컬 실행 방법(`npx serve` 등), API **두 번 호출 이유**, 비인증 **한도** 안내, [프롬프트 로그](docs/prompt-log.md)·**본 계획서** 링크.
+- **README**: 기능 요약, 로컬 실행 방법(`npx serve` 등), API **두 번 호출 이유**, 비인증 **한도** 안내, [프롬프트 로그](docs/prompt-log.md)·[UI 트러블슈팅](docs/ui-troubleshooting.md)·**본 계획서** 링크.
 - **AGENTS.md**: 작업 이력을 한 줄 단위로 짧게 기록한다.
 - **GitHub Pages 배포·CI 파이프라인**은 본 계획 범위에 포함하지 않는다. 필요 시 저장소 관리자가 별도로 구성한다.
 
@@ -78,7 +78,7 @@
 | 구분 | 내용 |
 |------|------|
 | **Must** | 비인증 `users` + `repos`, Enter·버튼 검색, 한국어 메시지, 404/403/네트워크 처리, 저장소 10개·새 탭, 단일 `app.js`·클래스 분리, README·로그·계획 문서 |
-| **Nice (본 프로젝트에서 구현 포함)** | 프로필·저장소 상세 필드, 링크·연락·이력·Gist 통계, GitHub 프로필 버튼, 로딩·전환·반응형, 한도 헤더 활용 가능 시 안내 |
+| **Nice (본 프로젝트에서 구현 포함)** | 프로필·저장소 상세 필드, 링크·연락·이력·Gist 통계, 프로필 이동(`@로그인`·`html_url`), 로딩·전환·반응형, 한도 헤더 활용 가능 시 안내 |
 
 ---
 
@@ -86,3 +86,4 @@
 
 - [README.md](README.md)
 - [docs/prompt-log.md](docs/prompt-log.md)
+- [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)

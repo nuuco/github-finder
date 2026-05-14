@@ -1,19 +1,18 @@
 # GitHub Finder
 
-GitHub 공개 API(비인증)로 **사용자 프로필**과 **최신 공개 저장소 10개**를 조회하는 정적 웹 페이지입니다. HTML, CSS, **단일 `app.js`**(클래스 기반)만 사용합니다.
+GitHub 공개 API(비인증)로 **사용자 프로필**과 **최신 공개 저장소 10개**를 조회하는 정적 웹 페이지입니다. HTML, CSS, **단일 `app.js`**(클래스 기반)만 사용하며, 화면은 **GitHub.com 프로필과 비슷한 톤**(라이트/다크, Octicons 스타일 SVG, vcard형 정보 줄)으로 구성합니다.
 
 ## 기능
 
-- GitHub **로그인과 정확히 일치**하는 사용자명으로 검색(Enter 또는 검색 버튼)
-- 프로필: 이미지, 표시 이름, **@로그인(GitHub 프로필 링크)**, 소개, **GitHub에서 프로필 보기** 버튼
-- **링크**: 웹사이트(`blog`), X(`twitter_username`), GitHub **팔로워/팔로잉 탭** 바로가기
-- **연락**: 소속(`company`), 위치(`location`), 공개 이메일(`email`) — **비인증** `GET /users/{login}` 응답에서는 GitHub 정책상 `email`이 **대부분 `null`**이라 프로필에 이메일이 있어도 앱에는 표시되지 않는 경우가 많습니다.
-- **이력**: 계정 가입 시각(`created_at`), 프로필 갱신 시각(`updated_at`)
-- 통계: 팔로워·팔로잉·공개 저장소·**공개 Gist** 수
-- 저장소: 설명, **다른 저장소에서 포크 여부** 표시, **주 언어**(`language`), **스타·포크 수**, **최근 푸시(또는 갱신)일**
-- 최신 업데이트 순 저장소 10개, 저장소 링크는 **새 탭**(`noopener noreferrer`)
-- 빈 입력, 404, 403(요청 한도), 네트워크 오류 등 **한국어 안내**
-- 비인증 API 한도가 남아 있으면 응답 헤더(`X-RateLimit-Remaining` 등)를 참고해 안내 문구에 반영할 수 있는 경우 반영
+- GitHub **로그인과 정확히 일치**하는 사용자명으로 검색(Enter 또는 검색 버튼). 검색 필드 왼쪽에 **돋보기 아이콘**(문서 내 SVG 스프라이트).
+- 프로필: 아바타, 표시 이름, **@로그인**(GitHub 사용자 프로필 `html_url`로 연결·작은 글씨·호버 시 밑줄 없이 배경·테두리 톤으로 강조), 소개(`bio`)는 **내용이 있을 때만** 표시.
+- **팔로워·팔로잉**: 이름 아래 한 줄로 **축약 숫자**(`formatGhCount`, 예: `12k`)와 GitHub **팔로워/팔로잉 탭** 링크.
+- **연락·링크·이력**: `ul#profile-vcard` **한 리스트**에 아이콘 + 텍스트/링크(소속, 위치, 웹 `blog`, 공개 `email`, X `twitter_username`, 가입·프로필 갱신일). **값이 있는 항목만** DOM에 넣고, 한 건도 없으면 리스트 전체를 숨김.
+- **통계 줄**(`#stats-row`): **공개 저장소 수**와 **공개 Gist 수**만 표시(아이콘: 저장소는 `repo`, Gist는 `code-square`로 구분).
+- 저장소 목록: 항목당 **저장소 아이콘** + 이름 링크(새 탭), 포크면 **포크** 뱃지, 설명·**주 언어**(색 점 + 이름, `LANG_COLOR` 매핑)·**스타·포크**·**업데이트일**은 **데이터가 있을 때만** 해당 블록 표시. 숫자는 `formatGhCount`로 표기.
+- 최신 업데이트 순 저장소 10개, 링크는 `noopener noreferrer`.
+- 빈 입력, 404, 403(요청 한도), 네트워크 오류 등 **한국어 안내**. 비인증 한도가 남아 있으면 `X-RateLimit-Remaining` 등을 참고해 안내 문구에 반영할 수 있는 경우 반영.
+- **공개 이메일**: 비인증 `GET /users/{login}` 응답의 `email`은 GitHub 정책상 **대부분 `null`**이라, 웹 프로필에 이메일이 있어도 앱에는 안 나올 수 있음(상세는 [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)).
 
 ## 검색 한 번에 API가 두 번 호출되는 이유
 
@@ -47,19 +46,24 @@ npx --yes serve .
 |--------|------|
 | `UrlSafety` | 외부 URL·`mailto`·트위터 프로필 URL 검증 (정적 메서드) |
 | `GitHubClient` | GitHub REST 호출·한도 헤더 해석 |
-| `FinderView` | DOM 참조·프로필·저장소 렌더링 (비공개 `#` 메서드로 섹션별 갱신) |
+| `FinderView` | DOM 바인딩, 프로필(vcard·인라인 팔로워/팔로잉·통계 줄), 저장소 목록·메타, `formatGhCount`·`LANG_COLOR` |
 | `GitHubFinderApp` | 폼 이벤트·검색 흐름·에러 처리·`AbortController` |
 
 ## 프로젝트 구조
 
 | 파일 | 설명 |
 |------|------|
-| `index.html` | 마크업 (`<script src="app.js" defer>`) |
-| `styles.css` | 스타일·반응형·전환 |
-| `app.js` | API 클라이언트·뷰·앱 컨트롤러 (클래스) |
+| `index.html` | 마크업, 상단 **SVG `<symbol>` 스프라이트**(Octicons 스타일), `#repo-item-template`, `<script src="app.js" defer>` |
+| `styles.css` | GitHub 유사 **라이트/다크** 변수, 검색·프로필·vcard·저장소·반응형 스타일 |
+| `app.js` | `UrlSafety`, `GitHubClient`, `FinderView`, `GitHubFinderApp` |
+| `PLAN.md` | 개발 계획(범위·Must/Nice) |
+| `AGENTS.md` | 작업 이력 한 줄 요약 |
+| `docs/prompt-log.md` | 프롬프트·의도/반영 로그 |
+| `docs/ui-troubleshooting.md` | UI 개편·증상별 원인·확인 방법 |
 
 ## 문서
 
 - 개발 계획(기능·API·스택·범위): [PLAN.md](PLAN.md)
 - 개발 시 사용한 프롬프트와 의도 정리: [docs/prompt-log.md](docs/prompt-log.md)
+- **UI 개편·트러블슈팅**(아이콘, vcard, 이메일 API, 빈 필드 숨김, 타이포 등): [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)
 

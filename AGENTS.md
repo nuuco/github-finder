@@ -12,3 +12,7 @@
 - README: 비인증 API에서 `email`이 비는 이유 안내
 - 프로필 `@로그인` 링크: 작은 글씨·호버 시 밑줄 없이 배경·테두리 톤으로 강조
 - vcard(연락·링크·이력) 본문·아이콘 글씨 크기 축소
+- docs/ui-troubleshooting.md 추가: UI 개편·증상별 원인·확인 방법 정리, README 문서 링크
+- README·docs/prompt-log.md 갱신: 최신 UI(vcard·통계·스프라이트·빈 필드)·프로젝트 구조·프롬프트 로그 항목 반영
+- PLAN.md: README 문서 범위·관련 링크에 ui-troubleshooting 반영
+- GitHub 프로필 보기 버튼 제거: `@로그인` 링크와 중복이라 마크업·`FinderView`·스프라이트·CSS 정리, README·PLAN·prompt-log·ui-troubleshooting 반영
