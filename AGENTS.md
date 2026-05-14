@@ -2,3 +2,13 @@
 
 - GitHub Finder 초기 구현: 계획서(바닐라 HTML/CSS/JS, 비인증 API, 한국어 UI)에 따라 `index.html`, `styles.css`, `js/api.js`, `js/ui.js`, `js/main.js` 추가
 - README·docs/prompt-log.md 작성: 로컬 실행 방법, API 2회 호출 이유, 비인증 한도 안내
+- 프로필·저장소 상세 표시: `company`, `location`, `blog`, `email`, `twitter_username`, 저장소 `language`·스타·포크·푸시일·포크 저장소 뱃지
+- 프로필 섹션: GitHub 이동 버튼, 링크(웹·X·팔로워/팔로잉 탭), 연락, 이력(가입·갱신일), 통계에 공개 Gist
+- 단일 `app.js` + OOP: `js/api.js`·`ui.js`·`main.js` 제거, `UrlSafety`·`GitHubClient`·`FinderView`·`GitHubFinderApp` 클래스로 통합
+- docs/prompt-log.md 형식 통일: 불릿·프롬프트 코드블록·`>` 인용으로 의도/반영 정리
+- PLAN.md 추가: 루트에 개발 계획 MD 저장, README·prompt-log에서 링크
+- GitHub 프로필 유사 UI: Octicons 스프라이트·vcard 리스트·인라인 팔로워/팔로잉·저장소 메타 아이콘, 빈 bio·언어·날짜 미표시
+- `icon-repo`를 Primer Octicons 공식 경로로 교체, Gist 통계 아이콘은 `code-square`로 구분
+- README: 비인증 API에서 `email`이 비는 이유 안내
+- 프로필 `@로그인` 링크: 작은 글씨·호버 시 밑줄 없이 배경·테두리 톤으로 강조
+- vcard(연락·링크·이력) 본문·아이콘 글씨 크기 축소

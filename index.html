@@ -7,6 +7,78 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- Octicons 스타일 16×16 (currentColor), Primer Octicons 기반 -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="icons-sprite" aria-hidden="true" focusable="false">
+      <defs>
+        <symbol id="icon-search" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
+          />
+        </symbol>
+        <symbol id="icon-mark-github" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+          />
+        </symbol>
+        <symbol id="icon-star" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"
+          />
+        </symbol>
+        <symbol id="icon-repo-forked" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"
+          />
+        </symbol>
+        <symbol id="icon-repo" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"
+          />
+        </symbol>
+        <symbol id="icon-code-square" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Zm7.47 3.97a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L10.69 8 9.22 6.53a.75.75 0 0 1 0-1.06ZM6.78 6.53 5.31 8l1.47 1.47a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-2-2a.75.75 0 0 1 0-1.06l2-2a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"
+          />
+        </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"
+          />
+        </symbol>
+        <symbol id="icon-location" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"
+          />
+        </symbol>
+        <symbol id="icon-mail" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM14.5 4.07l-6.25 5.25-6.25-5.25V3.25a.25.25 0 0 1 .25-.25h12a.25.25 0 0 1 .25.25v.82ZM14.5 11.9l-4.323-3.623L14.5 6.82v5.08Zm-12 0V6.82l4.323 1.655L2.5 11.9Zm10-8.663L8 7.928 3.5 3.237V3.25a.25.25 0 0 1 .25-.25h12a.25.25 0 0 1 .25.25v.012z"
+          />
+        </symbol>
+        <symbol id="icon-link" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042-.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83z"
+          />
+        </symbol>
+        <symbol id="icon-organization" viewBox="0 0 16 16">
+          <path
+            fill="currentColor"
+            d="M1.75 16A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0h8.5C11.216 0 12 .784 12 1.75v12.5c0 .085-.006.168-.018.25h2.268a.25.25 0 0 0 .25-.25V8.285a.25.25 0 0 0-.111-.208l-1.055-.703a.749.749 0 1 1 .832-1.248l1.055.703c.487.325.779.871.779 1.456v5.965A1.75 1.75 0 0 1 14.25 16h-3.5a.766.766 0 0 1-.197-.026c-.099.017-.2.026-.303.026h-3a.75.75 0 0 1-.75-.75V14h-1v1.25a.75.75 0 0 1-.75.75Zm-.25-1.75c0 .138.112.25.25.25H4v-1.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 .75.75v1.25h2.25a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25ZM3.75 6h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5ZM3 3.75A.75.75 0 0 1 3.75 3h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 3 3.75Zm4 3A.75.75 0 0 1 7.75 6h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 7 6.75ZM7.75 3h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5ZM3 9.75A.75.75 0 0 1 3.75 9h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 3 9.75ZM7.75 9h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5Z"
+          />
+        </symbol>
+      </defs>
+    </svg>
+
     <div class="app">
       <header class="header">
         <h1 class="header__title">GitHub Finder</h1>
@@ -17,7 +89,9 @@
         <form class="search__form" id="search-form" novalidate>
           <label class="visually-hidden" for="username-input">GitHub 사용자명</label>
           <div class="search__field">
-            <span class="search__icon" aria-hidden="true">&#128269;</span>
+            <span class="search__icon" aria-hidden="true">
+              <svg class="icon" width="16" height="16"><use href="#icon-search" /></svg>
+            </span>
             <input
               id="username-input"
               class="search__input"
@@ -61,23 +135,40 @@
             </div>
             <div class="profile__meta">
               <p id="profile-name" class="profile__name profile__placeholder">—</p>
-              <p id="profile-bio" class="profile__bio profile__placeholder">검색하면 프로필이 표시됩니다.</p>
+              <p id="profile-login" class="profile__login profile__placeholder" hidden></p>
+              <p id="profile-bio" class="profile__bio" hidden></p>
+              <p id="profile-inline-stats" class="profile-inline-stats" hidden aria-label="팔로워·팔로잉"></p>
+              <div id="profile-actions" class="profile-actions" hidden>
+                <a
+                  id="profile-github-btn"
+                  class="profile-github-btn"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  hidden
+                >
+                  <svg class="icon icon--inline" width="16" height="16" aria-hidden="true">
+                    <use href="#icon-mark-github" />
+                  </svg>
+                  <span>GitHub에서 프로필 보기</span>
+                </a>
+              </div>
+              <ul id="profile-vcard" class="profile-vcard" hidden></ul>
             </div>
           </div>
-          <div class="stats" id="stats-row" aria-label="통계">
-            <div class="stats__item">
-              <span class="stats__label">팔로워</span>
-              <span id="stat-followers" class="stats__value profile__placeholder">—</span>
-            </div>
-            <div class="stats__item">
-              <span class="stats__label">팔로잉</span>
-              <span id="stat-following" class="stats__value profile__placeholder">—</span>
-            </div>
-            <div class="stats__item">
-              <span class="stats__label">공개 저장소</span>
-              <span id="stat-repos" class="stats__value profile__placeholder">—</span>
-            </div>
-          </div>
+          <nav class="stats stats--github" id="stats-row" aria-label="공개 저장소·Gist" hidden>
+            <span class="stats__item stats__item--static">
+              <svg class="icon stats__icon" width="16" height="16" aria-hidden="true"><use href="#icon-repo" /></svg>
+              <span id="stat-repos" class="stats__num">0</span>
+              <span class="stats__lbl">저장소</span>
+            </span>
+            <span class="stats__sep" aria-hidden="true">·</span>
+            <span class="stats__item stats__item--static">
+              <svg class="icon stats__icon" width="16" height="16" aria-hidden="true"><use href="#icon-code-square" /></svg>
+              <span id="stat-gists" class="stats__num">0</span>
+              <span class="stats__lbl">Gist</span>
+            </span>
+          </nav>
         </section>
 
         <section class="panel repos-panel" aria-labelledby="repos-heading">
@@ -89,11 +180,33 @@
 
     <template id="repo-item-template">
       <li class="repos__item">
-        <a class="repos__link" href="" target="_blank" rel="noopener noreferrer"></a>
-        <p class="repos__desc"></p>
+        <div class="repos__top">
+          <svg class="icon repos__repo-icon" width="16" height="16" aria-hidden="true"><use href="#icon-repo" /></svg>
+          <a class="repos__link" href="" target="_blank" rel="noopener noreferrer"></a>
+          <span class="repos__fork-pill" hidden>포크</span>
+        </div>
+        <p class="repos__desc" hidden></p>
+        <div class="repos__meta" aria-label="저장소 지표">
+          <span class="repos__meta-item repos__lang-wrap" hidden>
+            <span class="repos__lang-dot" aria-hidden="true"></span>
+            <span class="repos__lang"></span>
+          </span>
+          <span class="repos__meta-item repos__stars">
+            <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#icon-star" /></svg>
+            <span class="repos__stars-num"></span>
+          </span>
+          <span class="repos__meta-item repos__forks">
+            <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#icon-repo-forked" /></svg>
+            <span class="repos__forks-num"></span>
+          </span>
+          <span class="repos__meta-item repos__pushed" hidden>
+            <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#icon-calendar" /></svg>
+            <span class="repos__pushed-txt"></span>
+          </span>
+        </div>
       </li>
     </template>
 
-    <script type="module" src="js/main.js"></script>
+    <script src="app.js" defer></script>
   </body>
 </html>
