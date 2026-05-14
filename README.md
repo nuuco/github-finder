@@ -68,7 +68,7 @@ npx --yes serve .
 | `index.html` | 마크업 · 상단 SVG `<symbol>` 스프라이트 · 검색(`#username-clear`) · `#search-recent` · `#profile-empty-hint` · `#repo-item-template` · `<script src="app.js" defer>` |
 | `styles.css` | 라이트/다크 변수 · 검색 · 최근 검색(드래그 커서·스크롤바 숨김) · 프로필 · 빈 안내 · vcard · 저장소 · 반응형 |
 | `app.js` | `RecentSearchStore` · `RecentSearchDragScroll` · `UrlSafety` · `GitHubClient` · `FinderView` · `GitHubFinderApp` |
-| `screencapture.png` | README **9. 화면 예시** 절에서 참조 |
+| `screencapture.png` | README **9. 배포 및 화면 캡쳐** 절에서 참조 |
 | `PLAN.md` | 개발 계획(범위 · Must/Nice) |
 | `AGENTS.md` | 작업 이력 한 줄 요약 |
 | `docs/prompt-log.md` | 프롬프트 · 의도/반영 로그 |
@@ -132,7 +132,9 @@ this.el.addEventListener(
 
 **요약**: 손가락/마우스가 조금만 움직인 상태에서는 버튼 클릭으로 남기고, 가로로 충분히 움직였을 때만 스크롤 드래그로 전환합니다. 드래그로 끝난 제스처 뒤에는 브라우저가 버튼에 남겨 줄 수 있는 “유령 클릭”을 캡처 단계에서 한 번 막아, 스크롤과 칩·× 동작이 같이 살아 있게 했습니다.
 
-## 9. 화면 예시
+## 9. 배포 및 화면 캡쳐
+
+배포(GitHub Pages): [https://nuuco.github.io/github-finder/](https://nuuco.github.io/github-finder/)
 
 <details>
 <summary><strong>스크린샷</strong> (클릭하여 펼치기)</summary>
