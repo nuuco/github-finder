@@ -31,3 +31,4 @@
 - app.js 리팩터: 미사용 `idleHint`·`FinderView.messages` 제거, 검색 폼 DOM `FinderView` 캐시·헬퍼, `renderRepos` 템플릿 호이스트, 최근 검색 DOM 캐시, 관성 스텝 정리 / `styles.css` 최근 검색 스크롤바 webkit 규칙 축소
 - README·docs/prompt-log.md: 현재 코드 기준 기능·클래스 구조 반영 및 상기 이슈 프롬프트 로그 항목 추가
 - README 전면: 개조식(섹션별 **키워드**·중점·나열)으로 통일
+- README: §1·§5·§6 표 형식 정리 · §1에 스켈레톤 UI 행 추가·오류·로딩 행과 역할 분리

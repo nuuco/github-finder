@@ -9,24 +9,26 @@
 <details>
 <summary><strong>화면 예시</strong> (클릭하여 펼치기)</summary>
 
-![GitHub Finder 화면 캡처](screencapture.png)
+<img src="screencapture.png" alt="GitHub Finder 화면: 검색·최근 검색 칩·프로필·저장소 목록" width="820" />
 
 </details>
 
 ## 1. 기능
 
-- **검색**: 로그인과 동일한 사용자명 · Enter 또는 검색 버튼 · 필드 왼쪽 돋보기(SVG 스프라이트) · 플레이스홀더 `사용자명 입력 (ex. octocat)` · 값이 있을 때만 표시되는 입력 지우기(×)
-- **최근 검색**: 성공한 조회만 로컬스토리지에 최대 10건 · 검색창 아래 칩 UI · 칩 클릭 재검색 · 항목별 × 삭제
-  - 가로 넘침: 스크롤바 숨김 · 마우스·펜은 드래그·손 뗀 뒤 관성 · 터치는 기본 가로 스크롤(`touch-action: pan-x`)
-- **초기 화면**: 검색 전 프로필 영역은 안내문만(`#profile-empty-hint`) · 저장소는 idle 안내 문구만(테두리 없는 플레이스홀더)
-- **프로필**: 아바타 · 표시 이름 · @로그인 링크(`html_url`, 작은 글씨·호버 톤) · `bio`는 값 있을 때만
-- **404**: 사용자 없음 문구만 작은 글씨·`--fg-muted` · 그 외 프로필 오류는 위험색 유지
-- **팔로워·팔로잉**: 이름 아래 한 줄 · `formatGhCount` 축약 · GitHub 팔로워/팔로잉 탭 링크
-- **vcard**(`#profile-vcard`): 소속·위치·웹·메일·X·가입·프로필 갱신을 아이콘+한 리스트로 표시 · 값 있는 항목만 · 없으면 블록 숨김
-- **통계**(`#stats-row`): 공개 저장소 수 · 공개 Gist 수(repo / code-square 아이콘 구분)
-- **저장소 목록**: 업데이트 순 최대 10건 · 새 탭 링크(`noopener noreferrer`) · 아이콘+이름 · 포크 뱃지 · 설명·언어(점+`LANG_COLOR`)·스타·포크·업데이트일은 데이터 있을 때만 · 숫자는 `formatGhCount` · idle 안내는 작은 글씨·`--fg-muted`
-- **오류·로딩**: 빈 입력·404·403·네트워크 한국어 안내 · 로딩 시 프로필 스켈레톤(원형 테두리 없음) · 403 시 가능하면 `X-RateLimit-Remaining` 반영
-- **이메일**: 비인증 API에서 `email`은 대부분 `null` — 웹 프로필과 불일치 가능([docs/ui-troubleshooting.md](docs/ui-troubleshooting.md))
+| 영역 | 내용 |
+|------|------|
+| 검색 | 로그인과 동일한 사용자명 · Enter 또는 검색 버튼 · 돋보기(SVG 스프라이트) · 플레이스홀더 `사용자명 입력 (ex. octocat)` · 입력 지우기(×, 값 있을 때만 표시) |
+| 최근 검색 | 성공한 조회만 로컬스토리지 최대 10건 · 칩 UI · 칩 클릭 재검색 · 항목별 × 삭제<br>가로 넘침: 스크롤바 숨김 · 마우스·펜 드래그·손 뗀 뒤 관성 · 터치는 기본 가로 스크롤(`touch-action: pan-x`) |
+| 초기 화면 | 검색 전 프로필은 안내문만(`#profile-empty-hint`) · 저장소는 idle 안내(테두리 없는 플레이스홀더) |
+| 스켈레톤 UI | 검색 직후·응답 대기 중에만 프로필 패널에 표시(`data-state="loading"`) · 아바타 자리 원형·이름·메타 막대 쉬머 · 실제 프로필·스켈레톤·에러 블록은 상태별로 한 블록만 노출 · 원형 아바타 자리는 테두리 없음 |
+| 프로필 | 아바타 · 표시 이름 · @로그인(`html_url`, 작은 글씨·호버 톤) · `bio`는 값 있을 때만 |
+| 404 | 사용자 없음: 작은 글씨·`--fg-muted` · 그 외 프로필 오류는 위험색 |
+| 팔로워·팔로잉 | 이름 아래 한 줄 · `formatGhCount` · GitHub 팔로워/팔로잉 탭 링크 |
+| vcard (`#profile-vcard`) | 소속·위치·웹·메일·X·가입·갱신일 · 아이콘+한 리스트 · 값 있는 항목만 · 없으면 블록 숨김 |
+| 통계 (`#stats-row`) | 공개 저장소 수 · 공개 Gist 수 · 아이콘 `repo` / `code-square` |
+| 저장소 목록 | 업데이트 순 최대 10건 · 새 탭(`noopener noreferrer`) · 아이콘+이름 · 포크 뱃지 · 설명·언어(`LANG_COLOR`)·스타·포크·업데이트일은 데이터 있을 때만 · `formatGhCount` · idle 안내는 작은 글씨·`--fg-muted` |
+| 오류·로딩 | 빈 입력·404·403·네트워크 한국어 안내 · 403 시 가능하면 `X-RateLimit-Remaining` 반영 |
+| 이메일 | 비인증 API `email`은 대부분 `null` — 웹과 불일치 가능([docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)) |
 
 ## 2. 검색 한 번에 API가 두 번 호출되는 이유
 
@@ -55,24 +57,29 @@ npx --yes serve .
 
 ## 5. 스크립트 구조 (OOP)
 
-- **파일**: [`app.js`](app.js) 한 파일에 클래스로 역할 분리
-- **`UrlSafety`**: 외부 URL · `mailto` · 트위터 프로필 URL 검증(정적 메서드)
-- **`GitHubClient`**: GitHub REST 호출 · 한도 헤더 해석
-- **`RecentSearchStore`**: 최근 로그인 로컬스토리지 읽기·추가·삭제(성공 시만 · 최대 10건)
-- **`RecentSearchDragScroll`**: `#search-recent-list`에 마우스·펜 가로 드래그·관성(터치는 네이티브 스크롤)
-- **`FinderView`**: `bind()`에서 검색·프로필·저장소 DOM 캐시 · vcard · 인라인 팔로워/팔로잉 · 통계 · 에러 · 빈 안내 · 저장소 목록·메타 · `formatGhCount` · `LANG_COLOR`
-- **`GitHubFinderApp`**: 폼 submit · 입력 · 지우기 · 최근 검색 칩 클릭 · 검색 흐름(`#runSearch`) · `AbortController` · `RecentSearchStore` · `RecentSearchDragScroll` 초기화
+역할은 단일 [`app.js`](app.js)에 클래스로 나뉩니다.
+
+| 클래스 | 역할 |
+|--------|------|
+| `UrlSafety` | 외부 URL · `mailto` · 트위터 프로필 URL 검증(정적 메서드) |
+| `GitHubClient` | GitHub REST 호출 · 한도 헤더 해석 |
+| `RecentSearchStore` | 최근 로그인 로컬스토리지 읽기·추가·삭제(성공 시만 · 최대 10건) |
+| `RecentSearchDragScroll` | `#search-recent-list`에 마우스·펜 가로 드래그·관성(터치는 네이티브 스크롤) |
+| `FinderView` | `bind()`에서 검색·프로필·저장소 DOM 캐시 · vcard · 인라인 팔로워/팔로잉 · 통계 · 에러 · 빈 안내 · 저장소 목록·메타 · `formatGhCount` · `LANG_COLOR` |
+| `GitHubFinderApp` | 폼 submit · 입력 · 지우기 · 최근 검색 칩 클릭 · 검색 흐름(`#runSearch`) · `AbortController` · `RecentSearchStore` · `RecentSearchDragScroll` 초기화 |
 
 ## 6. 프로젝트 구조
 
-- **`index.html`**: 마크업 · 상단 SVG `<symbol>` 스프라이트 · 검색(`#username-clear`) · `#search-recent` · `#profile-empty-hint` · `#repo-item-template` · `<script src="app.js" defer>`
-- **`styles.css`**: 라이트/다크 변수 · 검색 · 최근 검색(드래그 커서·스크롤바 숨김) · 프로필 · 빈 안내 · vcard · 저장소 · 반응형
-- **`app.js`**: `RecentSearchStore` · `RecentSearchDragScroll` · `UrlSafety` · `GitHubClient` · `FinderView` · `GitHubFinderApp`
-- **`screencapture.png`**: README용 앱 화면 캡처(접기/펼치기 블록에서 참조)
-- **`PLAN.md`**: 개발 계획(범위 · Must/Nice)
-- **`AGENTS.md`**: 작업 이력 한 줄 요약
-- **`docs/prompt-log.md`**: 프롬프트 · 의도/반영 로그
-- **`docs/ui-troubleshooting.md`**: UI 개편 · 증상별 안내 · **2.**~**9.** 절 트러블(문제 요약 → 프롬프트 → `> 의도/반영:`) · **10.** 참고 링크
+| 파일 | 설명 |
+|------|------|
+| `index.html` | 마크업 · 상단 SVG `<symbol>` 스프라이트 · 검색(`#username-clear`) · `#search-recent` · `#profile-empty-hint` · `#repo-item-template` · `<script src="app.js" defer>` |
+| `styles.css` | 라이트/다크 변수 · 검색 · 최근 검색(드래그 커서·스크롤바 숨김) · 프로필 · 빈 안내 · vcard · 저장소 · 반응형 |
+| `app.js` | `RecentSearchStore` · `RecentSearchDragScroll` · `UrlSafety` · `GitHubClient` · `FinderView` · `GitHubFinderApp` |
+| `screencapture.png` | README 화면 예시(`<details>` 블록에서 참조) |
+| `PLAN.md` | 개발 계획(범위 · Must/Nice) |
+| `AGENTS.md` | 작업 이력 한 줄 요약 |
+| `docs/prompt-log.md` | 프롬프트 · 의도/반영 로그 |
+| `docs/ui-troubleshooting.md` | UI 개편 · 증상별 안내 · **2.**~**9.** 절 트러블 · **10.** 참고 링크 |
 
 ## 7. 문서
 
