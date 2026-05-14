@@ -69,20 +69,15 @@ body {
 
 .header {
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.875rem;
+  padding-block: 0.75rem;
 }
 
 .header__title {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: clamp(1.35rem, 3.5vw, 1.65rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-}
-
-.header__subtitle {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--fg-muted);
 }
 
 .search__form {
@@ -219,29 +214,33 @@ body {
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--fg-muted) 45%, transparent) transparent;
+  touch-action: pan-x;
+  cursor: grab;
+  scrollbar-width: none;
 }
 
 .search-recent__list::-webkit-scrollbar {
-  height: 5px;
+  width: 0;
+  height: 0;
 }
 
 .search-recent__list::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--fg-muted) 50%, transparent);
+  background: transparent;
 }
 
 .search-recent__list::-webkit-scrollbar-track {
   background: transparent;
 }
 
+.search-recent__list--dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
 .search-recent__item {
   display: inline-flex;
   align-items: stretch;
   flex-shrink: 0;
-  scroll-snap-align: start;
   border: 1px solid color-mix(in srgb, var(--border-default) 85%, transparent);
   border-radius: 999px;
   background: var(--canvas-default);
@@ -387,8 +386,7 @@ body {
 
 .profile-empty-hint {
   display: none;
-  margin: 0 0 0.75rem;
-  padding: 1.1rem 0.75rem;
+  padding: 3rem 0.75rem;
   text-align: center;
   font-size: 0.8125rem;
   font-weight: 400;
@@ -448,12 +446,12 @@ body {
 }
 
 .profile-skeleton__bar--lg {
-  width: 58%;
+  width: 32%;
   height: 1.35rem;
 }
 
 .profile-skeleton__bar--sm {
-  width: 38%;
+  width: 18%;
   height: 0.82rem;
 }
 

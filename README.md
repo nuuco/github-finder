@@ -60,11 +60,11 @@ npx --yes serve .
 | `PLAN.md` | 개발 계획(범위·Must/Nice) |
 | `AGENTS.md` | 작업 이력 한 줄 요약 |
 | `docs/prompt-log.md` | 프롬프트·의도/반영 로그 |
-| `docs/ui-troubleshooting.md` | UI 개편·증상별 안내·**2.**~**8.** 절 트러블(문제 요약 → 프롬프트 코드블록 → `> 의도/반영:`) |
+| `docs/ui-troubleshooting.md` | UI 개편·증상별 안내·**2.**~**9.** 절 트러블(문제 요약 → 프롬프트 코드블록 → `> 의도/반영:`), **10.** 참고 링크 |
 
 ## 7. 문서
 
 - 개발 계획(기능·API·스택·범위): [PLAN.md](PLAN.md)
 - 개발 시 사용한 프롬프트와 의도 정리: [docs/prompt-log.md](docs/prompt-log.md)
-- **UI 개편·트러블슈팅**(아이콘, vcard, 이메일 API, 빈 필드 숨김, 타이포, 통합 상태 UI 등 — 본 문서 **2.**~**8.** 절은 [프롬프트 로그](docs/prompt-log.md)와 같은 **문제 요약 → 프롬프트 → `> 의도/반영:`** 형식): [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)
+- **UI 개편·트러블슈팅**(아이콘, vcard, 이메일 API, 빈 필드 숨김, 타이포, 통합 상태 UI, 최근 검색 드래그 등 — 본 문서 **2.**~**9.** 절은 [프롬프트 로그](docs/prompt-log.md)와 같은 **문제 요약 → 프롬프트 → `> 의도/반영:`** 형식): [docs/ui-troubleshooting.md](docs/ui-troubleshooting.md)
 

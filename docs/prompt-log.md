@@ -1,6 +1,6 @@
 # 프롬프트 로그 (GitHub Finder)
 
-이 문서는 개발 과정에서 나온 요청을 **의미가 드러나게** 정리한 것입니다. 최신 UI·문서 구조는 [README.md](../README.md), [docs/ui-troubleshooting.md](ui-troubleshooting.md)(**1.** 전체 방향 표·**2.**~**8.** 절은 모두 **문제 요약 → 프롬프트 코드블록 → `> 의도/반영:`** 형식)와 함께 보면 됩니다.
+이 문서는 개발 과정에서 나온 요청을 **의미가 드러나게** 정리한 것입니다. 최신 UI·문서 구조는 [README.md](../README.md), [docs/ui-troubleshooting.md](ui-troubleshooting.md)(**1.** 전체 방향 표·**2.**~**9.** 절은 모두 **문제 요약 → 프롬프트 코드블록 → `> 의도/반영:`** 형식·**10.** 참고 링크)와 함께 보면 됩니다.
 
 - 프롬프트:
 
