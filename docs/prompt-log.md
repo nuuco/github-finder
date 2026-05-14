@@ -164,7 +164,7 @@ UI 수정한 내용을 트러블슈팅 문서로 남기고 싶어.
 프롬프트 로그랑 README를 최신 코드에 맞게 갱신해 줘.
 ```
 
-> 의도/반영: README의 소개·기능·`FinderView` 설명·프로젝트 구조 표를 현재 마크업·vcard·통계 줄·저장소 메타·문서 파일 목록에 맞춤. 본 로그에 상단 안내 문단과 위 UI·문서 관련 프롬프트 블록 추가, 문서 링크 섹션 정비
+> 의도/반영: README의 소개·기능·`FinderView` 설명·프로젝트 구조 표를 현재 마크업·vcard·통계 줄·저장소 메타·문서 파일 목록에 맞춤. 본 로그에 상단 안내 문단과 위 UI·문서 관련 프롬프트 블록 추가, 문서 링크 섹션 정비. 이후 최근 검색·빈 화면·404 톤·리팩터 등은 별도 로그 항목으로 누적됨.
 
 ---
 
@@ -176,6 +176,97 @@ UI 수정한 내용을 트러블슈팅 문서로 남기고 싶어.
 ```
 
 > 의도/반영: **@로그인**과 동일 목적이라 중복 제거 권장 → `profile-actions`·`#profile-github-btn` 마크업 삭제, `#renderGithubButton`·`MESSAGES.btnGithubProfile` 제거, 미사용 `icon-mark-github` 스프라이트·`.profile-github-btn` CSS·`.icon--inline` 정리. README·PLAN·본 문서·[ui-troubleshooting.md](ui-troubleshooting.md) 반영
+
+---
+
+- 프롬프트:
+
+```
+최근 검색 항목은 10개까지로 늘리자 넘어가는 집은자연스럽게 슬라이딩해서 넘길수 있게?
+```
+
+> 의도/반영: `RECENT_SEARCH_MAX = 10`, `.search-recent__list` 가로 `overflow-x`·`flex-wrap: nowrap`·터치 `pan-x` 등. 이후 드래그·관성으로 발전(아래 항목).
+
+---
+
+- 프롬프트:
+
+```
+"해당 사용자를 찾을 수 없습니다" 가 그냥 진회색 글자였으면 좋겠고, 더 작은 글씨여도 괜찮을거 같아
+```
+
+> 의도/반영: 404만 `setProfileError(..., { subtleTitle: true })` + `#profile-error-title[data-tone="subtle"]`로 작은 타이포·`--fg-muted`. 다른 프로필 에러는 기존 위험색 유지.
+
+---
+
+- 프롬프트:
+
+```
+해당 글씨스타일대로 "검색하면 최신 저장소가 표시됩니다." 글씨 스타일  수정해. 단 둘다 컬러는 --fg-muted 로 수정
+```
+
+> 의도/반영: `.repos__placeholder`와 subtle 제목을 동일 크기·자간 등으로 맞추고 색은 `var(--fg-muted)`로 통일. idle·검색 후 0건 안내에 적용.
+
+---
+
+- 프롬프트:
+
+```
+1. 스켈레톤 원형에는 보더가 없어야해.
+2. 빈 화면일때는 안에 도형이나 그런거 없이 사용자명 검색하세요 같은 안내문구나오게
+3. 검색 인풋 플레이스 홀더를 문장형으로 자연스럽게 써줘.
+3. 검색인풋 써진 텍스트를 한번에 삭제할수 있는 x 버튼이 있었으면 좋겠어.
+```
+
+> 의도/반영: `.profile-skeleton__avatar` 보더 제거. `#profile-empty-hint` + `data-state="empty"`일 때 `.profile-content` 숨김·`MESSAGES.emptyScreenGuide`. `#username-clear`·`FinderView.syncUsernameClearButton`. 플레이스홀더는 이후 **`사용자명 입력 (ex. octocat)`** 으로 짧게 조정.
+
+---
+
+- 프롬프트:
+
+```
+최근검색 부분을 스크롤이 아니라, 머가 드래그하면 자연스럽게 슬라이딩 되게?하고싶어
+```
+
+```
+문제가 있어. 칩 영역은 드래그가 안돼서 사이사이만 드래그해야되는데 그게 너무 불편해
+```
+
+```
+근데 그렇게 하니까 칩 클릭이나 x표 클릭 동작이 안돼
+```
+
+> 의도/반영: `RecentSearchDragScroll` — 칩 위에서도 드래그 가능, 가로 임계·대각 판정 후 확정, **`setPointerCapture` 제거** 후 `window` `pointermove`/`pointerup` 캡처 단계로 드래그 직후 `click` 한 번만 억제. 관성 `requestAnimationFrame`. 스크롤바 숨김·`cursor: grab`. 터치는 기본 가로 스크롤. 상세·원인은 [ui-troubleshooting.md §9](ui-troubleshooting.md).
+
+---
+
+- 프롬프트:
+
+```
+좋아 이부분도 트러블슈팅 문서에 정리해줘.
+```
+
+> 의도/반영: `docs/ui-troubleshooting.md`에 **§9** 최근 검색 칩 인터랙션 절 추가, 기존 「더 보기」는 **§10**으로 이동. README·`prompt-log` 도입문의 절 범위 문구 갱신.
+
+---
+
+- 프롬프트:
+
+```
+전체적으로 코드에 불필요한 부분이나, 비효율적인 부분 없는지 리팩토링해줘.
+```
+
+> 의도/반영: 미사용 `MESSAGES.idleHint`·`FinderView.messages` 제거. 검색 폼 DOM을 `FinderView.bind()`에서 캐시하고 `getTrimmedUsername`·`setUsernameValue`·`getSearchForm` 등으로 앱의 반복 `getElementById` 축소. `#renderRecentChips`용 최근 검색 래퍼·리스트 캐시. `renderRepos`에서 템플릿 `firstElementChild` 호이스트. `RecentSearchDragScroll` 관성 루프에서 불필요한 클로저 제거. `styles.css` 최근 검색 webkit 스크롤바 규칙 축소.
+
+---
+
+- 프롬프트:
+
+```
+현재 코드 기준으로 프롬프트 로그와 리드미 최신화해줘.
+```
+
+> 의도/반영: README **기능·OOP 표·프로젝트 구조**를 위 변경(최근 검색 드래그·빈 안내·404 톤·입력 지우기·클래스 목록 등)에 맞춰 수정. 본 로그에 위 요청들을 **문제 요약 → 프롬프트 → 의도/반영** 블록으로 추가.
 
 ---
 
