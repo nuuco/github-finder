@@ -11,7 +11,6 @@ const PLACEHOLDER_AVATAR =
 
 const MESSAGES = Object.freeze({
   emptyInput: "사용자명을 입력해 주세요.",
-  loading: "불러오는 중…",
   notFound: "해당 사용자를 찾을 수 없습니다.",
   rateLimit: "요청 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.",
   rateLimitDetail(remaining, resetText) {
@@ -28,6 +27,7 @@ const MESSAGES = Object.freeze({
   noRepos: "표시할 공개 저장소가 없습니다.",
   idleHint: "검색하면 프로필이 표시됩니다.",
   idleRepos: "검색하면 최신 저장소가 표시됩니다.",
+  emptyScreenGuide: "사용자명을 입력하고 검색하면 프로필과 최신 저장소가 표시됩니다.",
   labelJoined: "가입",
   labelProfileUpdated: "프로필 갱신",
   followersSuffix: "팔로워",
@@ -35,9 +35,9 @@ const MESSAGES = Object.freeze({
 });
 
 const RECENT_SEARCH_STORAGE_KEY = "github-finder-recent-logins";
-const RECENT_SEARCH_MAX = 5;
+const RECENT_SEARCH_MAX = 10;
 
-/** 로컬스토리지 최근 검색 로그인(성공 시만 추가, 최대 5) */
+/** 로컬스토리지 최근 검색 로그인(성공 시만 추가, 최대 10) */
 class RecentSearchStore {
   /**
    * @returns {string[]}
@@ -302,6 +302,10 @@ class FinderView {
     /** @type {HTMLUListElement | null} */ this._repoListEl = null;
     /** @type {HTMLTemplateElement | null} */ this._repoTemplateEl = null;
     /** @type {HTMLElement | null} */ this._profilePanelEl = null;
+    /** @type {HTMLElement | null} */ this._profileErrorBlockEl = null;
+    /** @type {HTMLElement | null} */ this._profileErrorTitleEl = null;
+    /** @type {HTMLElement | null} */ this._profileErrorDetailEl = null;
+    /** @type {HTMLElement | null} */ this._searchFieldHintEl = null;
   }
 
   get messages() {
@@ -323,9 +327,16 @@ class FinderView {
     this._repoListEl = document.getElementById("repo-list");
     this._repoTemplateEl = document.getElementById("repo-item-template");
     this._profilePanelEl = document.getElementById("profile-panel");
+    this._profileErrorBlockEl = document.getElementById("profile-error-block");
+    this._profileErrorTitleEl = document.getElementById("profile-error-title");
+    this._profileErrorDetailEl = document.getElementById("profile-error-detail");
+    this._searchFieldHintEl = document.getElementById("search-field-hint");
+    const emptyHint = document.getElementById("profile-empty-hint");
+    if (emptyHint) emptyHint.textContent = MESSAGES.emptyScreenGuide;
   }
 
   /**
+   * 스크린리더용(시각적으로 숨김). 일반 안내는 프로필·검색 힌트에 표시한다.
    * @param {"idle"|"loading"|"error"|"success"} variant
    * @param {string} text
    */
@@ -335,20 +346,43 @@ class FinderView {
     this._statusEl.textContent = text;
   }
 
-  /**
-   * @param {boolean} busy
-   */
-  setSearchBusy(busy) {
-    const form = document.getElementById("search-form");
+  hideSearchFieldHint() {
     const input = document.getElementById("username-input");
-    const button = form?.querySelector('button[type="submit"]');
-    if (form) form.setAttribute("aria-busy", busy ? "true" : "false");
-    if (input) input.disabled = busy;
-    if (button) button.disabled = busy;
+    if (input instanceof HTMLInputElement) {
+      input.removeAttribute("aria-invalid");
+    }
+    if (!this._searchFieldHintEl) return;
+    this._searchFieldHintEl.textContent = "";
+    this._searchFieldHintEl.hidden = true;
   }
 
-  clearResultsToEmptyState() {
-    if (this._profilePanelEl) this._profilePanelEl.dataset.state = "empty";
+  /**
+   * @param {string} message
+   */
+  showSearchFieldHint(message) {
+    const input = document.getElementById("username-input");
+    if (input instanceof HTMLInputElement) {
+      input.setAttribute("aria-invalid", "true");
+    }
+    if (!this._searchFieldHintEl) return;
+    this._searchFieldHintEl.textContent = message;
+    this._searchFieldHintEl.hidden = false;
+  }
+
+  #hideProfileError() {
+    if (this._profileErrorBlockEl) this._profileErrorBlockEl.hidden = true;
+    if (this._profileErrorTitleEl) {
+      this._profileErrorTitleEl.textContent = "";
+      delete this._profileErrorTitleEl.dataset.tone;
+    }
+    if (this._profileErrorDetailEl) {
+      this._profileErrorDetailEl.textContent = "";
+      this._profileErrorDetailEl.hidden = true;
+    }
+  }
+
+  /** 프로필 패널 `data-state`는 건드리지 않고 아바타·메타·통계 행만 초기화 */
+  resetProfileContentDom() {
     if (this._avatarEl) {
       this._avatarEl.src = PLACEHOLDER_AVATAR;
       this._avatarEl.alt = "";
@@ -382,6 +416,80 @@ class FinderView {
     if (this._publicGistsEl) {
       this._publicGistsEl.textContent = "0";
     }
+  }
+
+  setProfileLoading() {
+    this.hideSearchFieldHint();
+    this.#hideProfileError();
+    this.resetProfileContentDom();
+    if (this._profilePanelEl) {
+      this._profilePanelEl.dataset.state = "loading";
+      this._profilePanelEl.setAttribute("aria-busy", "true");
+    }
+    this.renderRepos([], "loading");
+  }
+
+  /**
+   * @param {string} title
+   * @param {string} [detail]
+   * @param {{ subtleTitle?: boolean }} [options] `subtleTitle`: 404 등 안내형(진회색·작은 제목)
+   */
+  setProfileError(title, detail = "", options = {}) {
+    this.hideSearchFieldHint();
+    this.resetProfileContentDom();
+    if (this._profilePanelEl) {
+      this._profilePanelEl.dataset.state = "error";
+      this._profilePanelEl.setAttribute("aria-busy", "false");
+    }
+    if (this._profileErrorTitleEl) {
+      this._profileErrorTitleEl.textContent = title;
+      if (options && options.subtleTitle) {
+        this._profileErrorTitleEl.dataset.tone = "subtle";
+      } else {
+        delete this._profileErrorTitleEl.dataset.tone;
+      }
+    }
+    if (this._profileErrorDetailEl) {
+      const d = typeof detail === "string" ? detail.trim() : "";
+      if (d) {
+        this._profileErrorDetailEl.textContent = d;
+        this._profileErrorDetailEl.hidden = false;
+      } else {
+        this._profileErrorDetailEl.textContent = "";
+        this._profileErrorDetailEl.hidden = true;
+      }
+    }
+    if (this._profileErrorBlockEl) this._profileErrorBlockEl.hidden = false;
+  }
+
+  /**
+   * @param {boolean} busy
+   */
+  setSearchBusy(busy) {
+    const form = document.getElementById("search-form");
+    const input = document.getElementById("username-input");
+    const button = form?.querySelector('button[type="submit"]');
+    if (form) form.setAttribute("aria-busy", busy ? "true" : "false");
+    if (input) input.disabled = busy;
+    if (button) button.disabled = busy;
+    this.syncUsernameClearButton();
+  }
+
+  syncUsernameClearButton() {
+    const clearBtn = document.getElementById("username-clear");
+    const input = document.getElementById("username-input");
+    if (!(clearBtn instanceof HTMLButtonElement) || !(input instanceof HTMLInputElement)) return;
+    clearBtn.hidden = input.value.trim() === "" || input.disabled;
+  }
+
+  clearResultsToEmptyState() {
+    this.hideSearchFieldHint();
+    this.#hideProfileError();
+    if (this._profilePanelEl) {
+      this._profilePanelEl.dataset.state = "empty";
+      this._profilePanelEl.setAttribute("aria-busy", "false");
+    }
+    this.resetProfileContentDom();
     this.renderRepos([], "idle");
     if (this._repoListEl) this._repoListEl.dataset.state = "empty";
   }
@@ -532,7 +640,11 @@ class FinderView {
   renderProfile(user) {
     if (!user || typeof user !== "object") return;
 
-    if (this._profilePanelEl) this._profilePanelEl.dataset.state = "filled";
+    this.#hideProfileError();
+    if (this._profilePanelEl) {
+      this._profilePanelEl.dataset.state = "filled";
+      this._profilePanelEl.setAttribute("aria-busy", "false");
+    }
 
     const login = typeof user.login === "string" ? user.login : "";
     const name =
@@ -608,18 +720,32 @@ class FinderView {
 
   /**
    * @param {unknown} repos
-   * @param {"idle"|"searched"} listContext
+   * @param {"idle"|"searched"|"loading"|"reposError"} listContext
+   * @param {string} [reposErrorText] listContext가 reposError일 때 표시 문구
    */
-  renderRepos(repos, listContext = "idle") {
+  renderRepos(repos, listContext = "idle", reposErrorText) {
     if (!this._repoListEl || !this._repoTemplateEl) return;
 
     this._repoListEl.replaceChildren();
 
+    if (listContext === "loading") {
+      this._repoListEl.dataset.state = "loading";
+      return;
+    }
+
     if (!Array.isArray(repos) || repos.length === 0) {
       const hint = document.createElement("li");
-      hint.className = "repos__placeholder";
-      hint.textContent =
-        listContext === "searched" ? MESSAGES.noRepos : MESSAGES.idleRepos;
+      if (listContext === "reposError") {
+        hint.className = "repos__placeholder repos__placeholder--error";
+        hint.textContent =
+          typeof reposErrorText === "string" && reposErrorText.trim()
+            ? reposErrorText.trim()
+            : MESSAGES.reposError;
+      } else {
+        hint.className = "repos__placeholder";
+        hint.textContent =
+          listContext === "searched" ? MESSAGES.noRepos : MESSAGES.idleRepos;
+      }
       this._repoListEl.appendChild(hint);
       this._repoListEl.dataset.state = "empty";
       return;
@@ -796,10 +922,28 @@ class GitHubFinderApp {
     if (chip instanceof HTMLButtonElement && chip.dataset.login) {
       const login = chip.dataset.login;
       const input = document.getElementById("username-input");
-      if (input instanceof HTMLInputElement) input.value = login;
+      if (input instanceof HTMLInputElement) {
+        input.value = login;
+        this._view.syncUsernameClearButton();
+      }
       void this.#runSearch(login);
     }
   };
+
+  /**
+   * 긴 403·한도 안내를 제목/부가로 나눈다(첫 문장 끝 기준).
+   * @param {string} full
+   * @returns {{ title: string, detail: string }}
+   */
+  #splitAlertMessage(full) {
+    const t = typeof full === "string" ? full.trim() : "";
+    if (!t) return { title: "", detail: "" };
+    const idx = t.indexOf(". ");
+    if (idx > 0 && idx < t.length - 2) {
+      return { title: t.slice(0, idx + 1).trim(), detail: t.slice(idx + 2).trim() };
+    }
+    return { title: t, detail: "" };
+  }
 
   /**
    * @param {string} username 비어 있지 않은 trim된 로그인
@@ -810,59 +954,55 @@ class GitHubFinderApp {
     const { signal } = this._abortController;
 
     this._view.setSearchBusy(true);
-    this._view.setStatus("loading", MESSAGES.loading);
-    this._view.clearResultsToEmptyState();
-    this._view.showInitialEmptyCopy();
+    this._view.setProfileLoading();
 
     try {
       const result = await this._api.fetchUserThenRepos(username, signal);
 
       if (!result.userRes.ok) {
         if (result.userRes.status === 404) {
-          this._view.setStatus("error", MESSAGES.notFound);
-          this._view.clearResultsToEmptyState();
-          this._view.showInitialEmptyCopy();
+          this._view.setProfileError(MESSAGES.notFound, "", { subtleTitle: true });
+          this._view.renderRepos([], "idle");
           return;
         }
         if (result.userRes.status === 403) {
-          this._view.setStatus("error", this.#format403FromResponse(result.userRes.headers));
-          this._view.clearResultsToEmptyState();
-          this._view.showInitialEmptyCopy();
+          const full = this.#format403FromResponse(result.userRes.headers);
+          const { title, detail } = this.#splitAlertMessage(full);
+          this._view.setProfileError(title, detail);
+          this._view.renderRepos([], "idle");
           return;
         }
-        this._view.setStatus("error", MESSAGES.httpError(result.userRes.status));
-        this._view.clearResultsToEmptyState();
-        this._view.showInitialEmptyCopy();
+        this._view.setProfileError(MESSAGES.httpError(result.userRes.status));
+        this._view.renderRepos([], "idle");
         return;
       }
 
       if (!result.user || typeof result.user !== "object") {
-        this._view.setStatus("error", MESSAGES.reposError);
-        this._view.renderRepos([], "searched");
+        this._view.setProfileError(MESSAGES.reposError);
+        this._view.renderRepos([], "idle");
         return;
       }
 
       this._view.renderProfile(/** @type {Record<string, unknown>} */ (result.user));
 
       if (!result.reposRes) {
-        this._view.setStatus("error", MESSAGES.reposError);
-        this._view.renderRepos([], "searched");
+        this._view.renderRepos([], "reposError", MESSAGES.reposError);
         return;
       }
 
       if (!result.reposRes.ok) {
         if (result.reposRes.status === 403) {
-          this._view.setStatus("error", this.#format403FromResponse(result.reposRes.headers));
+          const full = this.#format403FromResponse(result.reposRes.headers);
+          const { title, detail } = this.#splitAlertMessage(full);
+          this._view.renderRepos([], "reposError", detail ? `${title} ${detail}` : title);
         } else {
-          this._view.setStatus("error", MESSAGES.httpError(result.reposRes.status));
+          this._view.renderRepos([], "reposError", MESSAGES.httpError(result.reposRes.status));
         }
-        this._view.renderRepos([], "searched");
         return;
       }
 
       const repos = Array.isArray(result.repos) ? result.repos : [];
       this._view.renderRepos(repos, "searched");
-      this._view.setStatus("success", "조회가 완료되었습니다.");
 
       const apiLogin =
         typeof result.user.login === "string" && result.user.login.trim()
@@ -872,18 +1012,17 @@ class GitHubFinderApp {
       this.#renderRecentChips();
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        this._view.setStatus("idle", "");
-        return;
-      }
-      if (err instanceof Error && err.message === "NETWORK") {
-        this._view.setStatus("error", MESSAGES.network);
         this._view.clearResultsToEmptyState();
         this._view.showInitialEmptyCopy();
         return;
       }
-      this._view.setStatus("error", MESSAGES.network);
-      this._view.clearResultsToEmptyState();
-      this._view.showInitialEmptyCopy();
+      if (err instanceof Error && err.message === "NETWORK") {
+        this._view.setProfileError(MESSAGES.network);
+        this._view.renderRepos([], "idle");
+        return;
+      }
+      this._view.setProfileError(MESSAGES.network);
+      this._view.renderRepos([], "idle");
     } finally {
       this._view.setSearchBusy(false);
     }
@@ -895,7 +1034,9 @@ class GitHubFinderApp {
 
     const username = this.#getTrimmedUsername();
     if (!username) {
-      this._view.setStatus("error", MESSAGES.emptyInput);
+      const input = document.getElementById("username-input");
+      this._view.showSearchFieldHint(MESSAGES.emptyInput);
+      if (input instanceof HTMLElement) input.focus();
       return;
     }
 
@@ -912,6 +1053,24 @@ class GitHubFinderApp {
     if (form instanceof HTMLFormElement) {
       form.addEventListener("submit", this.#onSearchSubmit);
     }
+
+    const userInput = document.getElementById("username-input");
+    const clearBtn = document.getElementById("username-clear");
+    if (userInput instanceof HTMLInputElement) {
+      userInput.addEventListener("input", () => {
+        this._view.hideSearchFieldHint();
+        this._view.syncUsernameClearButton();
+      });
+    }
+    if (clearBtn instanceof HTMLButtonElement && userInput instanceof HTMLInputElement) {
+      clearBtn.addEventListener("click", () => {
+        userInput.value = "";
+        this._view.hideSearchFieldHint();
+        this._view.syncUsernameClearButton();
+        userInput.focus();
+      });
+    }
+    this._view.syncUsernameClearButton();
 
     const recent = document.getElementById("search-recent");
     if (recent) recent.addEventListener("click", this.#onRecentClick);

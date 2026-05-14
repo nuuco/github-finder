@@ -1,6 +1,14 @@
 # UI 개편·트러블슈팅
 
-GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, **증상·원인·확인/대응**을 한곳에 정리한 문서입니다. 관련 코드는 주로 `index.html`, `styles.css`, `app.js`의 `FinderView`입니다.
+GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, 트러블·정리 내역을 한곳에 둔 문서입니다. 관련 코드는 주로 `index.html`, `styles.css`, `app.js`의 `FinderView`입니다.
+
+이 문서에서 **UI 이슈·요청**을 적을 때는 [프롬프트 로그](prompt-log.md)와 같이 아래 순서만 따른다.
+
+1. **문제 요약** — 실제로 겪었거나 혼동이 있었던 점을 짧게  
+2. **`- 프롬프트:`** — 아래에 **코드 블록**으로 당시 요청(말투·요지 유지)  
+3. **`> 의도/반영:`** — 한 블록으로 어떤 파일·로직으로 어떻게 맞췄는지
+
+**2.**부터 **8.**까지 각 절이 그 예시이며, **1.**은 합의된 전체 방향만 표로 두었다. 이후 새 절도 **2.**~**8.**과 동일 형식으로 추가한다.
 
 ---
 
@@ -9,7 +17,8 @@ GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, **증상·원인·
 | 영역 | 내용 |
 |------|------|
 | 색·배경 | GitHub에 가까운 라이트/다크 변수(`--canvas-*`, `--fg-*`, `--accent-fg` 등), 카드형 패널 |
-| 최근 검색 | 로컬스토리지 최대 5건·성공 시만·칩 UI(클릭 재검색·× 삭제) |
+| 최근 검색 | 로컬스토리지 최대 10건·성공 시만·칩 UI(클릭 재검색·× 삭제) |
+| 조회 상태 | 검색 아래 전역 문구 없음: 로딩은 프로필 패널 스켈레톤, 실패는 `#profile-error-*`, 빈 입력은 `#search-field-hint`, 저장소만 실패는 목록 플레이스홀더(`reposError`) |
 | 아이콘 | 문서 상단 SVG `<symbol>` 스프라이트(Primer Octicons 기반), `currentColor`로 테마 연동 |
 | 프로필 본문 | `링크`·`연락`·`이력` 제목 블록 제거 → **`ul#profile-vcard`** 한 리스트에 아이콘 + 값 |
 | 프로필 이동 | **@로그인** 링크가 `user.html_url`로 연결됨(별도 「프로필 보기」 버튼 없음·중복 제거) |
@@ -19,104 +28,199 @@ GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, **증상·원인·
 
 ---
 
-## 2. 아이콘이 깨지거나 이상해 보일 때
+## 2. 저장소 아이콘이 깨지거나 Octicon 톤이 안 맞을 때
 
-### 증상
+**문제 요약**  
+`#icon-repo` 윤곽이 어색하거나 다른 아이콘과 그릴 방식이 달라 보였다. Gist 통계 아이콘도 저장소와 구분이 안 됐다.
 
-- `#icon-repo`(저장소 아이콘) 윤곽이 어색하거나 다른 Octicon과 톤이 안 맞는다.
+- 프롬프트:
 
-### 원인·조치
+```
+`#icon-repo`(저장소 아이콘) 윤곽이 어색하거나 다른 Octicon과 톤이 안 맞는다.
+공식 path로 맞춰 주고, Gist는 저장소랑 다른 아이콘 쓰면 좋겠어.
+```
 
-- 초기에는 잘못된/구버전 `path`를 쓴 적이 있음. **[@primer/octicons `repo-16`](https://cdn.jsdelivr.net/npm/@primer/octicons@19.9.0/build/svg/repo-16.svg)** 공식 `path`로 교체함.
-- Gist 통계는 저장소와 구분하려 **`icon-code-square`** 스프라이트를 추가해 사용함.
-
-### 확인
-
-- `index.html` 안 `<symbol id="icon-repo">` … `</symbol>` 경로가 공식 SVG와 일치하는지 비교한다.
+> 의도/반영: [@primer/octicons `repo-16`](https://cdn.jsdelivr.net/npm/@primer/octicons@19.9.0/build/svg/repo-16.svg) 공식 `path`로 `index.html`의 `<symbol id="icon-repo">` 교체. Gist 통계는 **`icon-code-square`** 심볼을 스프라이트에 추가해 `#stats-row`에서 저장소와 구분. 확인 시 공식 SVG와 `path` 문자열을 직접 비교하면 된다.
 
 ---
 
-## 3. 이메일·연락처가 안 나올 때
+## 3. 웹에는 이메일이 있는데 앱 vcard에 메일 줄이 없을 때
 
-### 증상
+**문제 요약**  
+GitHub 웹 프로필에는 연락처가 보이는데, 앱에서는 메일 한 줄이 비어 있거나 안 나온다고 느껴진다.
 
-- GitHub 웹 프로필에는 이메일이 있는 것 같은데, 앱 vcard에는 메일 줄이 없다.
+- 프롬프트:
 
-### 원인
-
-- 앱은 **비인증** `GET https://api.github.com/users/{login}` 만 사용한다.
-- 이 응답의 **`email` 필드는 대부분 `null`**이다. GitHub 정책·프라이버시로, 웹에 보이는 정보와 REST JSON이 항상 같지 않다.
-
-### 확인
-
-```bash
-curl -sS "https://api.github.com/users/조회할로그인" | grep '"email"'
+```
+GitHub 웹 프로필에는 이메일이 있는 것 같은데, 앱 vcard에는 메일 줄이 없다.
+비인증 API 한계인지 README랑 트러블슈팅에도 적어 줘.
 ```
 
-`null`이면 앱에서도 표시할 수 없다. 값이 문자열로 오면 `UrlSafety.safeMailtoHref`를 통과할 때만 `mailto:` 링크로 렌더한다.
-
-### 조치
-
-- “비인증으로는 한계”가 맞는지 README·본 문서로 사용자에게 안내한다.
-- 토큰을 넣는 방식은 **클라이언트에 비밀 노출**이 되므로 본 프로젝트 범위 밖으로 두는 것이 일반적이다.
+> 의도/반영: 앱은 **비인증** `GET https://api.github.com/users/{login}` 만 쓰며, 응답의 **`email`은 대부분 `null`**인 게 GitHub 쪽 정책·프라이버시 특성임을 README·본 문서에 명시. 값이 문자열로 올 때만 `UrlSafety.safeMailtoHref` 통과 시 `mailto:`로 렌더. 클라이언트에 토큰을 싣는 방식은 비밀 노출이라 본 프로젝트 범위 밖으로 안내. 확인용: `curl -sS "https://api.github.com/users/로그인" | grep '"email"'`.
 
 ---
 
 ## 4. 일부 줄만 안 보일 때 (버그가 아닌 경우)
 
-### 바이오
+**문제 요약**  
+바이오·vcard·저장소 메타 중 일부만 사라져 보여 버그로 오해될 수 있다.
 
-- `bio`가 비어 있으면 **`#profile-bio`는 `hidden`** 처리한다. “소개 없음” 문구는 넣지 않는다.
+- 프롬프트:
 
-### vcard 전체
+```
+값 없는 필드는 굳이 '없음' 문구 말고 숨기고, 저장소도 설명·언어·날짜 줄은 데이터 있을 때만 보여 줘.
+언어 색은 대표 언어만 매핑하고 나머지는 기본 점 색으로.
+```
 
-- 소속·위치·웹·메일·X·가입·갱신 중 **하나도 없으면** `ul#profile-vcard` 자체를 `hidden` 처리한다.
-
-### 저장소 카드
-
-| 항목 | 조건 |
-|------|------|
-| 설명 | `description` 비어 있으면 설명 블록 `hidden` |
-| 주 언어 | `language` 없으면 언어 줄(점 + 텍스트) 전체 `hidden` |
-| 업데이트일 | `pushed_at` / `updated_at` 유효 날짜 없으면 날짜 줄 `hidden` |
-| 언어 색 점 | `LANG_COLOR`에 키가 있으면 해당 색, 없으면 `--lang-dot` 계열 기본색 |
+> 의도/반영: `bio` 비면 `#profile-bio`는 `hidden`. vcard 항목이 하나도 없으면 `ul#profile-vcard` 전체 `hidden`. 저장소 카드는 `description`·`language`·유효 날짜 없으면 해당 블록 `hidden`. 언어 점은 `LANG_COLOR` 키 있으면 해당 hex, 없으면 `--lang-dot`.
 
 ---
 
-## 5. `@로그인` 링크·vcard 글씨 크기
+## 5. `@로그인` 링크·vcard 글씨 크기·호버
 
-### `@로그인` (`#profile-login`)
+**문제 요약**  
+이름과 로그인 링크 위계가 안 보이거나, vcard 글자가 프로필 본문과 겹쳐 보였다. `@로그인` 호버가 웹 GitHub 톤과 맞지 않을 수 있다.
 
-- **작은 글씨**(`styles.css`의 `.profile__login`)로 이름과 위계를 나눔.
-- 호버는 **밑줄 없이** 포인트 색 + 옅은 배경 + 얇은 링(`box-shadow`)만 사용.
-- 키보드 포커스는 `:focus-visible`으로만 아웃라인.
+- 프롬프트:
 
-### vcard (`.profile-vcard__item`, `.profile-vcard__value`)
+```
+`@로그인`은 작은 글씨로 이름이랑 위계 나누고, 호버는 밑줄 말고 배경·테두리 톤만.
+vcard 본문·아이콘 크기도 한 단계 줄여 줘.
+```
 
-- 본문 **`0.8125rem`(13px)** 근처로 통일, 줄간격 `1.45`.
-- 아이콘은 **14×14px**로 본문에 맞춤.
-
----
-
-## 6. 숫자 표기 (팔로워·스타 등)
-
-- `app.js`의 **`formatGhCount`**: 큰 수를 `1.2k`, `12k` 형태로 축약(웹 GitHub와 비슷한 느낌).
-- 통계·인라인 팔로워·저장소 메타에서 공통 사용.
+> 의도/반영: `styles.css`의 `.profile__login`으로 작은 글씨, 호버는 `color`·`background-color`·`box-shadow`만. `:focus-visible`으로 키보드 아웃라인. vcard는 본문 `0.8125rem`·줄간격 `1.45`, 아이콘 **14×14px**.
 
 ---
 
-## 7. 관련 파일 빠른 링크
+## 6. 팔로워·스타 등 큰 숫자 표기
+
+**문제 요약**  
+팔로워·스타 수가 그대로 긴 정수로 나와 GitHub 웹과 느낌이 달랐다.
+
+- 프롬프트:
+
+```
+팔로워랑 스타 같은 건 GitHub처럼 k 단위로 줄여서 보여 주면 좋겠어.
+```
+
+> 의도/반영: `app.js`에 **`formatGhCount`** 추가·공통 사용. `1.2k`, `12k`, `M` 등 규칙으로 통계 줄·인라인 팔로워·저장소 메타 숫자에 적용.
+
+---
+
+## 7. UI 수정할 때 어떤 파일을 열어야 할지
+
+**문제 요약**  
+스프라이트·스타일·DOM 로직이 흩어져 있어, 증상별로 어디를 볼지 한눈에 정리가 필요했다.
+
+- 프롬프트:
+
+```
+UI 트러블슈팅 문서에 관련 파일 빠른 링크 표 넣어 줘.
+```
+
+> 의도/반영: 아래 표를 두어 역할만 빠르게 찾게 함.
 
 | 파일 | 역할 |
 |------|------|
-| [`index.html`](../index.html) | 스프라이트, vcard·통계·저장소 템플릿 마크업 |
-| [`styles.css`](../styles.css) | GitHub 톤 변수, 프로필·vcard·저장소·호버 스타일 |
-| [`app.js`](../app.js) | `FinderView` — vcard/인라인 통계/저장소 DOM, `formatGhCount`, `LANG_COLOR` |
+| [`index.html`](../index.html) | 스프라이트, vcard·통계·저장소·프로필 상태(스켈레톤·에러) 마크업 |
+| [`styles.css`](../styles.css) | GitHub 톤 변수, 프로필·vcard·저장소·상태별 패널 스타일 |
+| [`app.js`](../app.js) | `FinderView` — vcard/인라인 통계/저장소 DOM, `setProfileLoading`·`setProfileError` 등, `formatGhCount`, `LANG_COLOR` |
 
 ---
 
-## 8. 더 보기
+## 8. 통합 상태·스켈레톤·에러 톤·문서 정리 (연속 이슈)
+
+아래 **8.1**~**8.4**는 한 흐름으로 이어진 요청이라, 각각 **문제 요약 → `- 프롬프트:` → `> 의도/반영:`** 형식을 유지한다.
+
+### 8.1 검색 아래 전역 문구와 프로필·저장소 UI가 따로 노는 문제
+
+**문제 요약**  
+404·로딩·성공 안내가 검색창 아래 한 줄에만 몰리고, 프로필·저장소 카드와 맥락이 어긋나 보였다. 성공 시에도 불필요한 완료 문구가 뜨는 등 흐름이 산만했다.
+
+- 프롬프트:
+
+```
+「해당 사용자를 찾을 수 없습니다」나 조회 성공·불러오는 중 같은 안내가 UI에 자연스럽게 들어갔으면 좋겠어.
+따로 텍스트 영역 빼지 말고,
+① 조회 성공할 땐 굳이 따로 텍스트 표시 안 하고,
+② 불러오는 중… 은 텍스트 없이 프로필이랑 텍스트 자리만큼 스켈레톤,
+③ 실패할 때도 프로필 영역을 써서 알려줘.
+붙어 있던 플랜대로 구현해 줘.
+```
+
+> 의도/반영: `#status-message`는 시각적으로 숨기고(`visually-hidden`), `#profile-panel`에 `data-state`(empty / loading / error / filled)로 전환. `profile-content`·`profile-skeleton`·`profile-error-block`·`search-field-hint` 마크업 추가. `FinderView`에 `setProfileLoading`·`setProfileError`·`resetProfileContentDom`·검색 힌트, `renderRepos`에 `loading`·`reposError` 맥락. `#runSearch`에서 성공 문구 제거, 403 등 긴 문장은 `#splitAlertMessage`로 제목/부가 분리. 저장소만 실패할 때는 프로필은 유지하고 목록 플레이스홀더로만 안내.
+
+---
+
+### 8.2 스켈레톤이 상시 노출되고 프로필 원형이 세 겹으로 보이던 문제
+
+**문제 요약**  
+로딩이 아닐 때도 스켈레톤 행이 보였고, 기본 프로필 원·스켈레톤 원·에러용 원이 한 화면에 겹쳐 보였다. 스켈레톤 원 크기도 넓은 화면에서 실제 아바타(128px)와 달랐다.
+
+- 프롬프트:
+
+```
+스켈레톤 UI는 '불러오는 중' 일때만 노출되어야한다.
+로딩 된 후에는 스켈레톤UI 가 안보여야한다.
+현재 화면에 기존 원형 + 스켈레통 원형 + 알수없는 추가 원형 이렇게 3개가 보이고 있다 항상 1개만 보여야한다.
+스켈레톤 UI 원형 크기가 기존 프로필 원형 크기와 같아야한다.
+해당 사용자를 찾을 수 없다는 문구가 프로필 영역 중앙에 떠야하고 좀더 밝은 빨간색에 좀더 얇은 글씨로 해야해.
+```
+
+> 의도/반영: `.profile { display: flex }`가 뒤쪽 규칙이라 `.profile-skeleton`의 `display: none`이 무시되던 것이 원인. `#profile-panel[data-state]`별로 `.profile.profile-content` / `.profile.profile-skeleton`에 `display`를 `!important`로 고정해 상태당 한 블록만 표시. `@media (min-width: 40rem)`에서 `.profile-skeleton__avatar`를 `.profile__avatar`와 동일 128px로 통일. 에러는 아바타 마크업을 빼고 `profile-error-block__inner`로 가운데 정렬, 제목은 `font-weight: 300`·밝은 빨강 톤의 `color-mix`. `app.js`에서 에러 아바타 바인딩 제거.
+
+---
+
+### 8.3 프로필 에러 제목(404 등)이 너무 밝고 커 보이던 문제
+
+**문제 요약**  
+「해당 사용자를 찾을 수 없습니다」 등 에러 제목이 이전 톤보다 밝고 커서, 본문보다 튀거나 가독이 애매했다.
+
+- 프롬프트:
+
+```
+해당 사용자를 찾을 수 없습니다. -> 좀더 진한색으로 살짝 작은 글씨로 작성해줘.
+```
+
+> 의도/반영: `styles.css`의 `.profile-error__title`에 `font-size: 0.9375rem`, `font-weight: 400`, `color-mix`로 `danger-fg` 비중을 높여 더 진한 빨강에 가깝게 조정.
+
+---
+
+### 8.4 트러블슈팅 문서가 둘로 나뉘어 형식이 달랐던 문제
+
+**문제 요약**  
+`docs/troubleshooting-log.md`에만 프롬프트 기록이 있고 `ui-troubleshooting.md`는 증상 위주라, 같은 UI 이슈를 두 파일에서 오가며 봐야 했다. 중간에 프롬프트 말투를 살릴지·다듬을지 요청이 겹쳐 기록 방식도 흔들렸다.
+
+- 프롬프트:
+
+```
+트러블 슈팅은 '프롬프트'로 어떻게 처리했는지 기준으로 정리해줘.
+```
+
+```
+프롬프트를 의미는 통하되 좀더 다듬어서 써줘라
+```
+
+```
+아냐 요청하는 말투는 살려야지
+```
+
+```
+그냥 ui 트러블슈팅 문서 통합해줘라. 그리고 이런식으로 정리해
+
+어떤 문제가 있었는지 문제 요약
+
+그걸 어떤 프롬프트를 적용해서 어떻게 처리했는지 (프롬프트 로그 형식 참고)
+
+이렇게 문제와 해결의 연속으로 정리해줘.
+```
+
+> 의도/반영: `docs/troubleshooting-log.md`를 삭제하고 본 문서 **2.**~**8.** 절 전체를 위 도입의 **문제 요약 → `- 프롬프트:` → `> 의도/반영:`** 형식으로 맞춤. 도입문·**1.** 표·**7.**의 파일 표를 갱신. 이후 UI 트러블도 새 절을 추가하며 동일 형식으로만 적는다.
+
+---
+
+## 9. 더 보기
 
 - [README.md](../README.md) — 기능·비인증 `email` 안내·실행 방법  
 - [PLAN.md](../PLAN.md) — 원래 기능 범위  
-- [docs/prompt-log.md](prompt-log.md) — 요청·의도 로그
+- [docs/prompt-log.md](prompt-log.md) — 요청·의도 로그(전체 개발 맥락)

@@ -16,6 +16,11 @@
 - README·docs/prompt-log.md 갱신: 최신 UI(vcard·통계·스프라이트·빈 필드)·프로젝트 구조·프롬프트 로그 항목 반영
 - PLAN.md: README 문서 범위·관련 링크에 ui-troubleshooting 반영
 - GitHub 프로필 보기 버튼 제거: `@로그인` 링크와 중복이라 마크업·`FinderView`·스프라이트·CSS 정리, README·PLAN·prompt-log·ui-troubleshooting 반영
-- 최근 검색 칩: `RecentSearchStore`·`#runSearch`·`#search-recent` UI, 성공 시만 로컬스토리지 최대 5개·칩 클릭 재검색·× 삭제
+- 최근 검색 칩: `RecentSearchStore`·`#runSearch`·`#search-recent` UI, 성공 시만 로컬스토리지 최대 10개·칩 클릭 재검색·× 삭제·가로 스크롤(터치·얇은 스크롤바)
 - 최근 검색 칩 스타일: 패딩·간격 축소, × 버튼 배경·좌측 구분선 제거로 미니멀 톤
 - 최근 검색 칩: 바깥 좌우 여백 확대·라벨–× 사이 축소, 검색 입력 플레이스홀더를 `사용자명 (예: octocat)`로 수정
+- 프로필·저장소 통합 상태: `#status-message`는 시각 숨김, 로딩은 `#profile-panel` 스켈레톤·실패는 `#profile-error-*`·빈 입력은 `#search-field-hint`, 저장소만 실패는 `reposError` 플레이스홀더
+- 프로필 스켈레톤·에러 UI: `.profile`과 `display` 충돌 해소, 스켈레톤·아바타 크기 동기화, 에러 중앙 정렬 등
+- `docs/ui-troubleshooting.md`·`PLAN.md`·`prompt-log.md`·`README.md`: 절 제목 **N.** 형식(하위 **8.1** 등)·교차 참조 문구 정리
+- 프로필 404·저장소 빈 목록(idle·검색 후 없음) 안내: 동일 작은 타이포·색 `var(--fg-muted)`; 403·HTTP 등 프로필 제목·저장소 오류 플레이스홀더는 기존 위험색
+- 스켈레톤 아바타 보더 제거·빈 상태 프로필은 안내문만(`emptyScreenGuide`)·저장소 idle 플레이스홀더 테두리 없음·검색 플레이스홀더 `사용자명 입력 (ex. octocat)`·입력 지우기(`#username-clear`) 버튼

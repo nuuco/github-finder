@@ -92,11 +92,16 @@
               type="text"
               name="username"
               autocomplete="username"
-              placeholder="사용자명 (예: octocat)"
+              placeholder="사용자명 입력 (ex. octocat)"
               spellcheck="false"
+              aria-describedby="search-field-hint"
             />
+            <button type="button" id="username-clear" class="search__clear" aria-label="입력 지우기" hidden>
+              ×
+            </button>
             <button type="submit" class="search__button">검색</button>
           </div>
+          <p id="search-field-hint" class="search__hint" hidden role="alert"></p>
         </form>
         <div id="search-recent" class="search-recent" hidden>
           <h2 id="search-recent-heading" class="visually-hidden">최근 검색</h2>
@@ -109,22 +114,24 @@
       </section>
 
       <p
-        class="status"
+        class="status visually-hidden"
         id="status-message"
         role="status"
         aria-live="polite"
         data-variant="idle"
       ></p>
 
-      <main class="main">
+      <main class="main" id="main-content">
         <section
           class="panel profile-panel"
           id="profile-panel"
           aria-labelledby="profile-heading"
+          aria-busy="false"
           data-state="empty"
         >
           <h2 id="profile-heading" class="visually-hidden">사용자 프로필</h2>
-          <div class="profile">
+          <p id="profile-empty-hint" class="profile-empty-hint" role="status" aria-live="polite"></p>
+          <div class="profile profile-content">
             <div class="profile__avatar-wrap">
               <img
                 id="profile-avatar"
@@ -141,6 +148,23 @@
               <p id="profile-bio" class="profile__bio" hidden></p>
               <p id="profile-inline-stats" class="profile-inline-stats" hidden aria-label="팔로워·팔로잉"></p>
               <ul id="profile-vcard" class="profile-vcard" hidden></ul>
+            </div>
+          </div>
+          <div class="profile profile-skeleton" aria-hidden="true">
+            <div class="profile__avatar-wrap">
+              <div class="profile-skeleton__avatar"></div>
+            </div>
+            <div class="profile-skeleton__meta">
+              <div class="profile-skeleton__bar profile-skeleton__bar--lg"></div>
+              <div class="profile-skeleton__bar profile-skeleton__bar--sm"></div>
+              <div class="profile-skeleton__bar profile-skeleton__bar--md"></div>
+              <div class="profile-skeleton__bar profile-skeleton__bar--short"></div>
+            </div>
+          </div>
+          <div id="profile-error-block" class="profile-error-block" hidden role="alert">
+            <div class="profile-error-block__inner">
+              <p id="profile-error-title" class="profile-error__title"></p>
+              <p id="profile-error-detail" class="profile-error__detail" hidden></p>
             </div>
           </div>
           <nav class="stats stats--github" id="stats-row" aria-label="공개 저장소·Gist" hidden>
