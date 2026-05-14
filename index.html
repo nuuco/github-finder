@@ -92,12 +92,20 @@
               type="text"
               name="username"
               autocomplete="username"
-              placeholder="GitHub 로그인(정확히 일치)"
+              placeholder="사용자명 (예: octocat)"
               spellcheck="false"
             />
             <button type="submit" class="search__button">검색</button>
           </div>
         </form>
+        <div id="search-recent" class="search-recent" hidden>
+          <h2 id="search-recent-heading" class="visually-hidden">최근 검색</h2>
+          <ul
+            id="search-recent-list"
+            class="search-recent__list"
+            aria-labelledby="search-recent-heading"
+          ></ul>
+        </div>
       </section>
 
       <p

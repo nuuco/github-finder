@@ -34,6 +34,64 @@ const MESSAGES = Object.freeze({
   followingSuffix: "팔로잉",
 });
 
+const RECENT_SEARCH_STORAGE_KEY = "github-finder-recent-logins";
+const RECENT_SEARCH_MAX = 5;
+
+/** 로컬스토리지 최근 검색 로그인(성공 시만 추가, 최대 5) */
+class RecentSearchStore {
+  /**
+   * @returns {string[]}
+   */
+  static load() {
+    try {
+      const raw = localStorage.getItem(RECENT_SEARCH_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((x) => typeof x === "string" && x.trim())
+        .map((x) => /** @type {string} */ (x).trim());
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * @param {string[]} list
+   */
+  static save(list) {
+    try {
+      localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(list));
+    } catch {
+      /* 사생활 보호 모드·용량 제한 등 */
+    }
+  }
+
+  /**
+   * @param {string} login API `user.login`
+   */
+  static add(login) {
+    if (typeof login !== "string" || !login.trim()) return;
+    const canon = login.trim();
+    const lower = canon.toLowerCase();
+    let list = RecentSearchStore.load().filter((x) => x.toLowerCase() !== lower);
+    list.unshift(canon);
+    if (list.length > RECENT_SEARCH_MAX) list = list.slice(0, RECENT_SEARCH_MAX);
+    RecentSearchStore.save(list);
+  }
+
+  /**
+   * @param {string} login
+   */
+  static remove(login) {
+    const t = typeof login === "string" ? login.trim() : "";
+    if (!t) return;
+    const lower = t.toLowerCase();
+    const list = RecentSearchStore.load().filter((x) => x.toLowerCase() !== lower);
+    RecentSearchStore.save(list);
+  }
+}
+
 /** GitHub 웹과 유사한 큰 수 축약 (예: 12.5k) */
 function formatGhCount(n) {
   if (!Number.isFinite(n)) return "0";
@@ -668,7 +726,7 @@ class FinderView {
   }
 }
 
-/** 검색 흐름·에러 처리 */
+/** 검색 흐름·에러 처리·최근 검색 칩 */
 class GitHubFinderApp {
   constructor() {
     this._api = new GitHubClient();
@@ -693,16 +751,60 @@ class GitHubFinderApp {
     return input.value.trim();
   }
 
-  /** @param {SubmitEvent} event */
-  #onSearchSubmit = async (event) => {
-    event.preventDefault();
+  #renderRecentChips() {
+    const wrap = document.getElementById("search-recent");
+    const list = document.getElementById("search-recent-list");
+    if (!wrap || !list) return;
+    list.replaceChildren();
+    const items = RecentSearchStore.load();
+    for (const login of items) {
+      const li = document.createElement("li");
+      li.className = "search-recent__item";
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "search-recent__chip";
+      chip.dataset.login = login;
+      chip.textContent = `@${login}`;
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "search-recent__remove";
+      rm.dataset.login = login;
+      rm.setAttribute("aria-label", `${login} 기록에서 삭제`);
+      rm.textContent = "×";
+      li.append(chip, rm);
+      list.appendChild(li);
+    }
+    wrap.hidden = items.length === 0;
+  }
 
-    const username = this.#getTrimmedUsername();
-    if (!username) {
-      this._view.setStatus("error", MESSAGES.emptyInput);
+  /** @param {MouseEvent} event */
+  #onRecentClick = (event) => {
+    const t = event.target;
+    if (!(t instanceof Element)) return;
+    const removeBtn = t.closest(".search-recent__remove");
+    if (removeBtn instanceof HTMLButtonElement) {
+      event.preventDefault();
+      event.stopPropagation();
+      const login = removeBtn.dataset.login;
+      if (login) {
+        RecentSearchStore.remove(login);
+        this.#renderRecentChips();
+      }
       return;
     }
+    const chip = t.closest(".search-recent__chip");
+    if (chip instanceof HTMLButtonElement && chip.dataset.login) {
+      const login = chip.dataset.login;
+      const input = document.getElementById("username-input");
+      if (input instanceof HTMLInputElement) input.value = login;
+      void this.#runSearch(login);
+    }
+  };
 
+  /**
+   * @param {string} username 비어 있지 않은 trim된 로그인
+   */
+  async #runSearch(username) {
     if (this._abortController) this._abortController.abort();
     this._abortController = new AbortController();
     const { signal } = this._abortController;
@@ -761,6 +863,13 @@ class GitHubFinderApp {
       const repos = Array.isArray(result.repos) ? result.repos : [];
       this._view.renderRepos(repos, "searched");
       this._view.setStatus("success", "조회가 완료되었습니다.");
+
+      const apiLogin =
+        typeof result.user.login === "string" && result.user.login.trim()
+          ? result.user.login.trim()
+          : username;
+      RecentSearchStore.add(apiLogin);
+      this.#renderRecentChips();
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         this._view.setStatus("idle", "");
@@ -778,6 +887,19 @@ class GitHubFinderApp {
     } finally {
       this._view.setSearchBusy(false);
     }
+  }
+
+  /** @param {SubmitEvent} event */
+  #onSearchSubmit = async (event) => {
+    event.preventDefault();
+
+    const username = this.#getTrimmedUsername();
+    if (!username) {
+      this._view.setStatus("error", MESSAGES.emptyInput);
+      return;
+    }
+
+    await this.#runSearch(username);
   };
 
   init() {
@@ -790,6 +912,11 @@ class GitHubFinderApp {
     if (form instanceof HTMLFormElement) {
       form.addEventListener("submit", this.#onSearchSubmit);
     }
+
+    const recent = document.getElementById("search-recent");
+    if (recent) recent.addEventListener("click", this.#onRecentClick);
+
+    this.#renderRecentChips();
   }
 }
 

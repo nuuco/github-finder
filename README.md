@@ -5,6 +5,7 @@ GitHub 공개 API(비인증)로 **사용자 프로필**과 **최신 공개 저�
 ## 기능
 
 - GitHub **로그인과 정확히 일치**하는 사용자명으로 검색(Enter 또는 검색 버튼). 검색 필드 왼쪽에 **돋보기 아이콘**(문서 내 SVG 스프라이트).
+- **최근 검색**: 조회가 **성공**한 로그인만 **로컬스토리지**에 최대 **5개**까지 저장. 검색창 아래 **칩**으로 표시되며, 칩 클릭 시 바로 재검색, **×**로 항목별 삭제.
 - 프로필: 아바타, 표시 이름, **@로그인**(GitHub 사용자 프로필 `html_url`로 연결·작은 글씨·호버 시 밑줄 없이 배경·테두리 톤으로 강조), 소개(`bio`)는 **내용이 있을 때만** 표시.
 - **팔로워·팔로잉**: 이름 아래 한 줄로 **축약 숫자**(`formatGhCount`, 예: `12k`)와 GitHub **팔로워/팔로잉 탭** 링크.
 - **연락·링크·이력**: `ul#profile-vcard` **한 리스트**에 아이콘 + 텍스트/링크(소속, 위치, 웹 `blog`, 공개 `email`, X `twitter_username`, 가입·프로필 갱신일). **값이 있는 항목만** DOM에 넣고, 한 건도 없으면 리스트 전체를 숨김.
@@ -47,15 +48,15 @@ npx --yes serve .
 | `UrlSafety` | 외부 URL·`mailto`·트위터 프로필 URL 검증 (정적 메서드) |
 | `GitHubClient` | GitHub REST 호출·한도 헤더 해석 |
 | `FinderView` | DOM 바인딩, 프로필(vcard·인라인 팔로워/팔로잉·통계 줄), 저장소 목록·메타, `formatGhCount`·`LANG_COLOR` |
-| `GitHubFinderApp` | 폼 이벤트·검색 흐름·에러 처리·`AbortController` |
+| `GitHubFinderApp` | 폼·**최근 검색 칩** 이벤트, 검색 흐름(`#runSearch`), `AbortController`, `RecentSearchStore`와 연동 |
 
 ## 프로젝트 구조
 
 | 파일 | 설명 |
 |------|------|
-| `index.html` | 마크업, 상단 **SVG `<symbol>` 스프라이트**(Octicons 스타일), `#repo-item-template`, `<script src="app.js" defer>` |
-| `styles.css` | GitHub 유사 **라이트/다크** 변수, 검색·프로필·vcard·저장소·반응형 스타일 |
-| `app.js` | `UrlSafety`, `GitHubClient`, `FinderView`, `GitHubFinderApp` |
+| `index.html` | 마크업, 상단 **SVG `<symbol>` 스프라이트**(Octicons 스타일), `#search-recent`·`#repo-item-template`, `<script src="app.js" defer>` |
+| `styles.css` | GitHub 유사 **라이트/다크** 변수, 검색·**최근 검색 칩**·프로필·vcard·저장소·반응형 스타일 |
+| `app.js` | `UrlSafety`, `GitHubClient`, `FinderView`, `RecentSearchStore`, `GitHubFinderApp` |
 | `PLAN.md` | 개발 계획(범위·Must/Nice) |
 | `AGENTS.md` | 작업 이력 한 줄 요약 |
 | `docs/prompt-log.md` | 프롬프트·의도/반영 로그 |

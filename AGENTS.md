@@ -16,3 +16,6 @@
 - README·docs/prompt-log.md 갱신: 최신 UI(vcard·통계·스프라이트·빈 필드)·프로젝트 구조·프롬프트 로그 항목 반영
 - PLAN.md: README 문서 범위·관련 링크에 ui-troubleshooting 반영
 - GitHub 프로필 보기 버튼 제거: `@로그인` 링크와 중복이라 마크업·`FinderView`·스프라이트·CSS 정리, README·PLAN·prompt-log·ui-troubleshooting 반영
+- 최근 검색 칩: `RecentSearchStore`·`#runSearch`·`#search-recent` UI, 성공 시만 로컬스토리지 최대 5개·칩 클릭 재검색·× 삭제
+- 최근 검색 칩 스타일: 패딩·간격 축소, × 버튼 배경·좌측 구분선 제거로 미니멀 톤
+- 최근 검색 칩: 바깥 좌우 여백 확대·라벨–× 사이 축소, 검색 입력 플레이스홀더를 `사용자명 (예: octocat)`로 수정

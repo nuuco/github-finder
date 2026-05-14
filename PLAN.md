@@ -19,7 +19,8 @@
   - `UrlSafety` — 외부 URL·`mailto`·X 프로필 URL 검증
   - `GitHubClient` — `fetch`, 한도 관련 응답 헤더 해석
   - `FinderView` — DOM 참조 및 프로필·저장소 렌더링
-  - `GitHubFinderApp` — 폼 이벤트, 검색 흐름, `AbortController`, 에러 분기
+  - `GitHubFinderApp` — 폼·최근 검색 칩 이벤트, 검색 흐름, `AbortController`, 에러 분기
+  - `RecentSearchStore` — 로컬스토리지 최근 로그인 목록(최대 5, 성공 시만 추가)
 - **ESLint**는 도입하지 않는다.
 
 ---
@@ -34,6 +35,7 @@
 - **디바운스·입력 중 자동 검색은 하지 않는다.** Enter 또는 검색 버튼으로만 요청한다.
 - 연속 검색 시 이전 요청은 `AbortController`로 취소할 수 있게 한다.
 - 403(한도 등)일 때 응답에 `X-RateLimit-Remaining` 등이 있으면 **가능한 범위에서** 안내 문구에 반영한다.
+- **최근 검색(클라이언트만)**: 사용자+저장소 조회가 **모두 성공**한 로그인만 `localStorage` 키 `github-finder-recent-logins`에 최대 5개 저장. 검색창 아래 칩으로 재검색·개별 삭제.
 
 ---
 
