@@ -28,3 +28,4 @@
 - 헤더 하단 여백: `.header` `margin-bottom` 1.5rem → 1.25rem → 0.875rem으로 축소
 - 프로필 로딩 스켈레톤: 표시명 줄(`profile-skeleton__bar--lg`) 58% → 32%, `@로그인` 줄(`--sm`) 18%
 - docs/ui-troubleshooting: §9 최근 검색 칩 드래그·클릭 정리, §10 더 보기, README·prompt-log 절 범위(2.~9.) 갱신
+- app.js 리팩터: 미사용 `idleHint`·`FinderView.messages` 제거, 검색 폼 DOM `FinderView` 캐시·헬퍼, `renderRepos` 템플릿 호이스트, 최근 검색 DOM 캐시, 관성 스텝 정리 / `styles.css` 최근 검색 스크롤바 webkit 규칙 축소

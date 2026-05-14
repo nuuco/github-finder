@@ -25,7 +25,6 @@ const MESSAGES = Object.freeze({
   },
   reposError: "저장소 목록을 가져오지 못했습니다.",
   noRepos: "표시할 공개 저장소가 없습니다.",
-  idleHint: "검색하면 프로필이 표시됩니다.",
   idleRepos: "검색하면 최신 저장소가 표시됩니다.",
   emptyScreenGuide: "사용자명을 입력하고 검색하면 프로필과 최신 저장소가 표시됩니다.",
   labelJoined: "가입",
@@ -220,14 +219,13 @@ class RecentSearchDragScroll {
     if (Math.abs(scrollVel) < 90) return;
 
     const el = this.el;
-    const maxScroll = () => Math.max(0, el.scrollWidth - el.clientWidth);
     let last = performance.now();
 
     const step = (now) => {
       const dt = Math.min((now - last) / 1000, 0.04);
       last = now;
       el.scrollLeft += scrollVel * dt;
-      const max = maxScroll();
+      const max = Math.max(0, el.scrollWidth - el.clientWidth);
       if (el.scrollLeft < 0) el.scrollLeft = 0;
       if (el.scrollLeft > max) el.scrollLeft = max;
       if (el.scrollLeft <= 0 && scrollVel < 0) scrollVel = 0;
@@ -467,10 +465,10 @@ class FinderView {
     /** @type {HTMLElement | null} */ this._profileErrorTitleEl = null;
     /** @type {HTMLElement | null} */ this._profileErrorDetailEl = null;
     /** @type {HTMLElement | null} */ this._searchFieldHintEl = null;
-  }
-
-  get messages() {
-    return MESSAGES;
+    /** @type {HTMLFormElement | null} */ this._searchFormEl = null;
+    /** @type {HTMLInputElement | null} */ this._usernameInputEl = null;
+    /** @type {HTMLButtonElement | null} */ this._usernameClearBtn = null;
+    /** @type {HTMLButtonElement | null} */ this._searchSubmitBtn = null;
   }
 
   bind() {
@@ -492,8 +490,50 @@ class FinderView {
     this._profileErrorTitleEl = document.getElementById("profile-error-title");
     this._profileErrorDetailEl = document.getElementById("profile-error-detail");
     this._searchFieldHintEl = document.getElementById("search-field-hint");
+    const form = document.getElementById("search-form");
+    this._searchFormEl = form instanceof HTMLFormElement ? form : null;
+    const uIn = document.getElementById("username-input");
+    this._usernameInputEl = uIn instanceof HTMLInputElement ? uIn : null;
+    const uClr = document.getElementById("username-clear");
+    this._usernameClearBtn = uClr instanceof HTMLButtonElement ? uClr : null;
+    const sub = this._searchFormEl?.querySelector('button[type="submit"]');
+    this._searchSubmitBtn = sub instanceof HTMLButtonElement ? sub : null;
     const emptyHint = document.getElementById("profile-empty-hint");
     if (emptyHint) emptyHint.textContent = MESSAGES.emptyScreenGuide;
+  }
+
+  /** @returns {string} */
+  getTrimmedUsername() {
+    const v = this._usernameInputEl?.value;
+    return typeof v === "string" ? v.trim() : "";
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUsernameValue(value) {
+    if (!this._usernameInputEl) return;
+    this._usernameInputEl.value = value;
+    this.syncUsernameClearButton();
+  }
+
+  focusUsernameInput() {
+    this._usernameInputEl?.focus();
+  }
+
+  /** @returns {HTMLInputElement | null} */
+  getUsernameInput() {
+    return this._usernameInputEl;
+  }
+
+  /** @returns {HTMLButtonElement | null} */
+  getUsernameClearButton() {
+    return this._usernameClearBtn;
+  }
+
+  /** @returns {HTMLFormElement | null} */
+  getSearchForm() {
+    return this._searchFormEl;
   }
 
   /**
@@ -508,10 +548,7 @@ class FinderView {
   }
 
   hideSearchFieldHint() {
-    const input = document.getElementById("username-input");
-    if (input instanceof HTMLInputElement) {
-      input.removeAttribute("aria-invalid");
-    }
+    this._usernameInputEl?.removeAttribute("aria-invalid");
     if (!this._searchFieldHintEl) return;
     this._searchFieldHintEl.textContent = "";
     this._searchFieldHintEl.hidden = true;
@@ -521,10 +558,7 @@ class FinderView {
    * @param {string} message
    */
   showSearchFieldHint(message) {
-    const input = document.getElementById("username-input");
-    if (input instanceof HTMLInputElement) {
-      input.setAttribute("aria-invalid", "true");
-    }
+    this._usernameInputEl?.setAttribute("aria-invalid", "true");
     if (!this._searchFieldHintEl) return;
     this._searchFieldHintEl.textContent = message;
     this._searchFieldHintEl.hidden = false;
@@ -627,19 +661,16 @@ class FinderView {
    * @param {boolean} busy
    */
   setSearchBusy(busy) {
-    const form = document.getElementById("search-form");
-    const input = document.getElementById("username-input");
-    const button = form?.querySelector('button[type="submit"]');
-    if (form) form.setAttribute("aria-busy", busy ? "true" : "false");
-    if (input) input.disabled = busy;
-    if (button) button.disabled = busy;
+    if (this._searchFormEl) this._searchFormEl.setAttribute("aria-busy", busy ? "true" : "false");
+    if (this._usernameInputEl) this._usernameInputEl.disabled = busy;
+    if (this._searchSubmitBtn) this._searchSubmitBtn.disabled = busy;
     this.syncUsernameClearButton();
   }
 
   syncUsernameClearButton() {
-    const clearBtn = document.getElementById("username-clear");
-    const input = document.getElementById("username-input");
-    if (!(clearBtn instanceof HTMLButtonElement) || !(input instanceof HTMLInputElement)) return;
+    const clearBtn = this._usernameClearBtn;
+    const input = this._usernameInputEl;
+    if (!clearBtn || !input) return;
     clearBtn.hidden = input.value.trim() === "" || input.disabled;
   }
 
@@ -914,6 +945,9 @@ class FinderView {
 
     this._repoListEl.dataset.state = "filled";
 
+    const tplNode = this._repoTemplateEl.content.firstElementChild;
+    if (!(tplNode instanceof HTMLElement)) return;
+
     const frag = document.createDocumentFragment();
     for (const item of repos) {
       if (!item || typeof item !== "object") continue;
@@ -921,9 +955,7 @@ class FinderView {
       const htmlUrl = typeof item.html_url === "string" ? item.html_url : "";
       if (!name || !htmlUrl) continue;
 
-      const node = this._repoTemplateEl.content.firstElementChild;
-      if (!(node instanceof HTMLElement)) continue;
-      const li = /** @type {HTMLElement} */ (node.cloneNode(true));
+      const li = /** @type {HTMLElement} */ (tplNode.cloneNode(true));
       const a = li.querySelector(".repos__link");
       const desc = li.querySelector(".repos__desc");
       const forkPill = li.querySelector(".repos__fork-pill");
@@ -1019,6 +1051,8 @@ class GitHubFinderApp {
     this._api = new GitHubClient();
     this._view = new FinderView();
     /** @type {AbortController | null} */ this._abortController = null;
+    /** @type {HTMLElement | null} */ this._recentWrap = null;
+    /** @type {HTMLUListElement | null} */ this._recentList = null;
   }
 
   /**
@@ -1032,15 +1066,9 @@ class GitHubFinderApp {
     return MESSAGES.rateLimit;
   }
 
-  #getTrimmedUsername() {
-    const input = document.getElementById("username-input");
-    if (!(input instanceof HTMLInputElement)) return "";
-    return input.value.trim();
-  }
-
   #renderRecentChips() {
-    const wrap = document.getElementById("search-recent");
-    const list = document.getElementById("search-recent-list");
+    const wrap = this._recentWrap;
+    const list = this._recentList;
     if (!wrap || !list) return;
     list.replaceChildren();
     const items = RecentSearchStore.load();
@@ -1082,11 +1110,7 @@ class GitHubFinderApp {
     const chip = t.closest(".search-recent__chip");
     if (chip instanceof HTMLButtonElement && chip.dataset.login) {
       const login = chip.dataset.login;
-      const input = document.getElementById("username-input");
-      if (input instanceof HTMLInputElement) {
-        input.value = login;
-        this._view.syncUsernameClearButton();
-      }
+      this._view.setUsernameValue(login);
       void this.#runSearch(login);
     }
   };
@@ -1193,11 +1217,10 @@ class GitHubFinderApp {
   #onSearchSubmit = async (event) => {
     event.preventDefault();
 
-    const username = this.#getTrimmedUsername();
+    const username = this._view.getTrimmedUsername();
     if (!username) {
-      const input = document.getElementById("username-input");
       this._view.showSearchFieldHint(MESSAGES.emptyInput);
-      if (input instanceof HTMLElement) input.focus();
+      this._view.focusUsernameInput();
       return;
     }
 
@@ -1206,39 +1229,40 @@ class GitHubFinderApp {
 
   init() {
     this._view.bind();
+    this._recentWrap = document.getElementById("search-recent");
+    const rl = document.getElementById("search-recent-list");
+    this._recentList = rl instanceof HTMLUListElement ? rl : null;
+
     this._view.clearResultsToEmptyState();
     this._view.showInitialEmptyCopy();
     this._view.setStatus("idle", "");
 
-    const form = document.getElementById("search-form");
-    if (form instanceof HTMLFormElement) {
+    const form = this._view.getSearchForm();
+    if (form) {
       form.addEventListener("submit", this.#onSearchSubmit);
     }
 
-    const userInput = document.getElementById("username-input");
-    const clearBtn = document.getElementById("username-clear");
-    if (userInput instanceof HTMLInputElement) {
+    const userInput = this._view.getUsernameInput();
+    const clearBtn = this._view.getUsernameClearButton();
+    if (userInput) {
       userInput.addEventListener("input", () => {
         this._view.hideSearchFieldHint();
         this._view.syncUsernameClearButton();
       });
     }
-    if (clearBtn instanceof HTMLButtonElement && userInput instanceof HTMLInputElement) {
+    if (clearBtn && userInput) {
       clearBtn.addEventListener("click", () => {
-        userInput.value = "";
+        this._view.setUsernameValue("");
         this._view.hideSearchFieldHint();
-        this._view.syncUsernameClearButton();
-        userInput.focus();
+        this._view.focusUsernameInput();
       });
     }
     this._view.syncUsernameClearButton();
 
-    const recent = document.getElementById("search-recent");
-    if (recent) recent.addEventListener("click", this.#onRecentClick);
+    if (this._recentWrap) this._recentWrap.addEventListener("click", this.#onRecentClick);
 
-    const recentList = document.getElementById("search-recent-list");
-    if (recentList instanceof HTMLElement) {
-      new RecentSearchDragScroll(recentList);
+    if (this._recentList) {
+      new RecentSearchDragScroll(this._recentList);
     }
 
     this.#renderRecentChips();

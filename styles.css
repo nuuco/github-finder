@@ -224,14 +224,6 @@ body {
   height: 0;
 }
 
-.search-recent__list::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-
-.search-recent__list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .search-recent__list--dragging {
   cursor: grabbing;
   user-select: none;
