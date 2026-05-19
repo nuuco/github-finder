@@ -1,7 +1,7 @@
 # GitHub Finder
 
 - **목적**: GitHub 공개 REST API(비인증)로 사용자 프로필과 최신 공개 저장소 10개를 조회하는 정적 페이지
-- **구성**: HTML · CSS · 단일 [`app.js`](app.js)(클래스 기반)
+- **구성**: HTML · CSS · [`js/`](js/) 스크립트(클래스 기반 · ES 모듈·번들러 없음)
 - **UI**: GitHub.com 프로필에 가까운 톤(라이트/다크 · Octicons 스타일 SVG 스프라이트 · vcard형 정보 줄)
 
 > GitHub 웹의 **프로필·저장소** 화면을 참고해 색·타이포·아이콘·여백이 **익숙한 톤**으로 보이도록 맞추는 데 무게를 두었습니다. Primer·Octicons나 공식 UI와 **완전히 동일한 복제**를 목표로 하지는 않습니다.
@@ -36,7 +36,7 @@
 
 ## 4. 로컬에서 실행하는 방법
 
-- **`file://`**: `index.html`만 열어도 동작하는 경우가 많음 · 환경에 따라 `fetch` 제한 가능
+- **`file://`**: `index.html`만 열어도 동작하는 경우가 많음 · 환경에 따라 `fetch` 제한 가능 · `js/` 스크립트는 **`index.html`과 같은 폴더 기준**으로 `defer` 순서대로 로드(ES `import` 미사용)
 - **권장**: 정적 서버로 서빙
 - **예시** (`serve`):
 
@@ -50,7 +50,16 @@ npx --yes serve .
 
 ## 5. 스크립트 구조 (OOP)
 
-역할은 단일 [`app.js`](app.js)에 클래스로 나뉩니다.
+역할은 [`js/`](js/) 아래 파일로 나뉩니다. `index.html`에서 **아래 순서**로 `<script defer>` 로드합니다(전역 클래스·함수, 번들러 없음).
+
+| 파일 | 주요 내용 |
+|------|-----------|
+| [`js/constants.js`](js/constants.js) | `MESSAGES`, `PLACEHOLDER_AVATAR`, 최근 검색 스토리지 키 |
+| [`js/recent-search.js`](js/recent-search.js) | `RecentSearchStore`, `RecentSearchDragScroll` |
+| [`js/format.js`](js/format.js) | `formatGhCount`, `LANG_COLOR`, `createIconUse` |
+| [`js/api.js`](js/api.js) | `UrlSafety`, `GitHubClient` |
+| [`js/view.js`](js/view.js) | `FinderView` |
+| [`js/main.js`](js/main.js) | `GitHubFinderApp` · 진입 `init()` |
 
 | 클래스 | 역할 |
 |--------|------|
@@ -65,9 +74,14 @@ npx --yes serve .
 
 | 파일 | 설명 |
 |------|------|
-| `index.html` | 마크업 · 상단 SVG `<symbol>` 스프라이트 · 검색(`#username-clear`) · `#search-recent` · `#profile-empty-hint` · `#repo-item-template` · `<script src="app.js" defer>` |
-| `styles.css` | 라이트/다크 변수 · 검색 · 최근 검색(드래그 커서·스크롤바 숨김) · 프로필 · 빈 안내 · vcard · 저장소 · 반응형 |
-| `app.js` | `RecentSearchStore` · `RecentSearchDragScroll` · `UrlSafety` · `GitHubClient` · `FinderView` · `GitHubFinderApp` |
+| `index.html` | 마크업 · SVG 스프라이트 · 검색·프로필·저장소 · `js/*.js` 6개 `defer` 순서 로드 |
+| `styles.css` | 라이트/다크 변수 · 검색 · 최근 검색 · 프로필 · 저장소 · 반응형 |
+| `js/constants.js` | 공통 메시지·아바타 placeholder·로컬스토리지 키 |
+| `js/recent-search.js` | 최근 검색 저장·칩 드래그 스크롤 |
+| `js/format.js` | 숫자 축약·언어 색·Octicon `use` 헬퍼 |
+| `js/api.js` | URL 검증·GitHub REST |
+| `js/view.js` | DOM 렌더링(`FinderView`) |
+| `js/main.js` | 앱 컨트롤러(`GitHubFinderApp`) |
 | `screencapture.png` | README **9. 배포 및 화면 캡쳐** 절에서 참조 |
 | `PLAN.md` | 개발 계획(범위 · Must/Nice) |
 | `AGENTS.md` | 작업 이력 한 줄 요약 |
@@ -88,7 +102,7 @@ GitHub 웹 프로필·저장소 화면의 톤이 마음에 들어, 아이콘(Oct
 
 이 과정에서 포인터 이벤트가 겹칠 때(스크롤 vs 클릭) 순서와 플래그로 흐름을 나누는 패턴을 코드로 정리할 수 있어 의미 있었습니다.
 
-아래는 [`app.js`](app.js)의 `RecentSearchDragScroll`의 핵심 로직입니다.
+아래는 [`js/recent-search.js`](js/recent-search.js)의 `RecentSearchDragScroll` 핵심 로직입니다.
 
 ```javascript
 const RECENT_DRAG_COMMIT_PX = 10;
@@ -128,7 +142,7 @@ this.el.addEventListener(
 );
 ```
 
-실제 [`app.js`](app.js)에서는 위 `click` 처리가 `#onClickCapture` 메서드로 분리되어 `constructor`에서 `this.el.addEventListener("click", this.#onClickCapture, true)` 형태로 붙어 있습니다.
+실제 [`js/recent-search.js`](js/recent-search.js)에서는 위 `click` 처리가 `#onClickCapture` 메서드로 분리되어 `constructor`에서 `this.el.addEventListener("click", this.#onClickCapture, true)` 형태로 붙어 있습니다.
 
 **요약**: 손가락/마우스가 조금만 움직인 상태에서는 버튼 클릭으로 남기고, 가로로 충분히 움직였을 때만 스크롤 드래그로 전환합니다. 드래그로 끝난 제스처 뒤에는 브라우저가 버튼에 남겨 줄 수 있는 “유령 클릭”을 캡처 단계에서 한 번 막아, 스크롤과 칩·× 동작이 같이 살아 있게 했습니다.
 

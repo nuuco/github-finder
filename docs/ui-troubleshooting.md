@@ -1,6 +1,6 @@
 # UI 개편·트러블슈팅
 
-GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, 트러블·정리 내역을 한곳에 둔 문서입니다. 관련 코드는 주로 `index.html`, `styles.css`, `app.js`의 `FinderView`입니다.
+GitHub 웹 프로필과 비슷한 톤으로 UI를 바꾼 뒤, 트러블·정리 내역을 한곳에 둔 문서입니다. 관련 코드는 주로 `index.html`, `styles.css`, [`js/view.js`](../js/view.js) 등 `js/` 스크립트입니다.
 
 이 문서에서 **UI 이슈·요청**을 적을 때는 [프롬프트 로그](prompt-log.md)와 같이 아래 순서만 따른다.
 
@@ -124,7 +124,7 @@ UI 트러블슈팅 문서에 관련 파일 빠른 링크 표 넣어 줘.
 |------|------|
 | [`index.html`](../index.html) | 스프라이트, vcard·통계·저장소·프로필 상태(스켈레톤·에러) 마크업 |
 | [`styles.css`](../styles.css) | GitHub 톤 변수, 프로필·vcard·저장소·상태별 패널 스타일 |
-| [`app.js`](../app.js) | `FinderView` — vcard/인라인 통계/저장소 DOM, `setProfileLoading`·`setProfileError` 등, `formatGhCount`, `LANG_COLOR`, 최근 검색 `RecentSearchDragScroll`(§9) |
+| [`js/view.js`](../js/view.js) · [`js/format.js`](../js/format.js) · [`js/recent-search.js`](../js/recent-search.js) | `FinderView` — vcard/인라인 통계/저장소 DOM, `setProfileLoading`·`setProfileError` 등, `formatGhCount`, `LANG_COLOR`, `RecentSearchDragScroll`(§9) |
 
 ---
 

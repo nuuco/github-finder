@@ -34,3 +34,4 @@
 - README: §1·§5·§6 표 형식 정리 · §1에 스켈레톤 UI 행 추가·오류·로딩 행과 역할 분리
 - README: 화면 예시 `<details>`를 상단에서 제거하고 **9. 화면 예시**로 하단 이전, §6 `screencapture.png` 설명 갱신
 - README §9 제목 **배포 및 화면 캡쳐**로 확정, §6 교차 참조 동일 반영
+- `app.js` → `js/` 6파일 분리: `constants`·`recent-search`·`format`·`api`·`view`·`main`, `index.html` defer 순서 로드(ES module 없음), README·PLAN 반영

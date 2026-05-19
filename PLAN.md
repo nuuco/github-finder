@@ -15,12 +15,14 @@
 ## 2. 스택·구조
 
 - **HTML / CSS / JavaScript만** 사용한다. React, Vite, Tailwind, 번들러는 사용하지 않는다.
-- 스크립트는 **루트의 `app.js` 단일 파일**로 유지하고, 역할은 **클래스(OOP)** 로 나눈다.
-  - `UrlSafety` — 외부 URL·`mailto`·X 프로필 URL 검증
-  - `GitHubClient` — `fetch`, 한도 관련 응답 헤더 해석
-  - `FinderView` — DOM 참조 및 프로필·저장소 렌더링
-  - `GitHubFinderApp` — 폼·최근 검색 칩 이벤트, 검색 흐름, `AbortController`, 에러 분기
-  - `RecentSearchStore` — 로컬스토리지 최근 로그인 목록(최대 10, 성공 시만 추가)
+- 스크립트는 **`js/` 디렉터리**에 역할별로 나누고, `index.html`에서 **고정된 `<script defer>` 순서**로 로드한다(ES 모듈·`import` 없음).
+  - `constants.js` — 메시지·placeholder·스토리지 키
+  - `recent-search.js` — `RecentSearchStore`, `RecentSearchDragScroll`
+  - `format.js` — `formatGhCount`, `LANG_COLOR`, 아이콘 헬퍼
+  - `api.js` — `UrlSafety`, `GitHubClient`
+  - `view.js` — `FinderView`
+  - `main.js` — `GitHubFinderApp`, 진입점
+  - 클래스 역할: `UrlSafety`, `GitHubClient`, `FinderView`, `GitHubFinderApp`, `RecentSearchStore` 등(OOP)
 - **ESLint**는 도입하지 않는다.
 
 ---
@@ -79,7 +81,7 @@
 
 | 구분 | 내용 |
 |------|------|
-| **Must** | 비인증 `users` + `repos`, Enter·버튼 검색, 한국어 메시지, 404/403/네트워크 처리, 저장소 10개·새 탭, 단일 `app.js`·클래스 분리, README·로그·계획 문서 |
+| **Must** | 비인증 `users` + `repos`, Enter·버튼 검색, 한국어 메시지, 404/403/네트워크 처리, 저장소 10개·새 탭, `js/` 스크립트 분리·클래스 구조, README·로그·계획 문서 |
 | **Nice (본 프로젝트에서 구현 포함)** | 프로필·저장소 상세 필드, 링크·연락·이력·Gist 통계, 프로필 이동(`@로그인`·`html_url`), 로딩·전환·반응형, 한도 헤더 활용 가능 시 안내 |
 
 ---
